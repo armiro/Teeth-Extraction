@@ -8,6 +8,50 @@ def draw_histogram(image):
     plt.show()
 
 
+def match_histogram(source, template):
+    """
+    Adjust the pixel values of a gray-scale image such that its histogram
+    matches that of a target image
+
+    Arguments:
+    -----------
+        source: np.ndarray
+            Image to transform; the histogram is computed over the flattened
+            array
+        template: np.ndarray
+            Template image; can have different dimensions to source
+    Returns:
+    -----------
+        matched: np.ndarray
+            The transformed output image
+    """
+
+    oldshape = source.shape
+    source = source.ravel()
+    template = template.ravel()
+
+    # get the set of unique pixel values and their corresponding indices and
+    # counts
+    s_values, bin_idx, s_counts = np.unique(source, return_inverse=True, return_counts=True)
+    t_values, t_counts = np.unique(template, return_counts=True)
+
+    # take the cumsum of the counts and normalize by the number of pixels to
+    # get the empirical cumulative distribution functions for the source and
+    # template images (maps pixel value --> quantile)
+    s_quantiles = np.cumsum(s_counts).astype(np.float64)
+    s_quantiles /= s_quantiles[-1]
+    t_quantiles = np.cumsum(t_counts).astype(np.float64)
+    t_quantiles /= t_quantiles[-1]
+
+    # interpolate linearly to find the pixel values in the template image
+    # that correspond most closely to the quantiles in the source image
+    interpolated_t_values = np.interp(s_quantiles, t_quantiles, t_values)
+    hist_matched_img = interpolated_t_values[bin_idx].reshape(oldshape)
+    result = np.array(hist_matched_img, dtype='uint8')
+
+    return result
+
+
 def equalize_histogram(image):
     equ = cv2.equalizeHist(image)
     res = np.hstack((image, equ))
@@ -99,20 +143,36 @@ def dilation(image, iterations):
     plt.show()
 
 
-img_address = "./test-images/female_35.bmp"
+img_address = "./test-images/female_27.bmp"
+tmp_address = "./test-images/female_35.bmp"
 img = cv2.imread(img_address, 0)
-equalized, both_images = equalize_histogram(image=img)
+tmp = cv2.imread(tmp_address, 0)
+# img = img[120:330, 120:620]
+
+
+# equalized, both_images = equalize_histogram(image=img)
 adaptive_equalized = CLAHE(image=img)
+tmp_equalized = CLAHE(image=tmp)
 # double_equalized = CLAHE(image=adaptive_equalized)
+matched = match_histogram(source=img, template=tmp)
 
 # draw_histogram(image=img)
-# draw_histogram(image=equalized)
+# draw_histogram(image=src)
 # draw_histogram(image=adaptive_equalized)
-# draw_histogram(image=d)
+# draw_histogram(image=matched)
 
+adaptive_threshold(image=img)
+adaptive_threshold(image=tmp)
+adaptive_threshold(image=matched)
 
-# plt.subplot(121), plt.imshow(adaptive_equalized, cmap='gray')
+# print(img.dtype)
+# print(tmp.dtype)
+# print(matched.dtype)
+
+# plt.subplot(311), plt.imshow(tmp, cmap='gray')
 # plt.xticks([]), plt.yticks([])
-# plt.subplot(122), plt.imshow(b, cmap='gray')
+# plt.subplot(312), plt.imshow(img, cmap='gray')
+# plt.xticks([]), plt.yticks([])
+# plt.subplot(313), plt.imshow(matched, cmap='gray')
 # plt.xticks([]), plt.yticks([])
 # plt.show()
