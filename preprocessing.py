@@ -1,6 +1,7 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+from skimage.filters import (threshold_otsu, threshold_niblack, threshold_sauvola)
 
 
 def draw_histogram(image):
@@ -60,119 +61,178 @@ def equalize_histogram(image):
 
 def CLAHE(image):
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-    cl = clahe.apply(image)
-    return cl
+    adaptive_equalized = clahe.apply(image)
+    return adaptive_equalized
 
 
-def global_threshold(image, threshold):
+def global_threshold(image, threshold, show_result=False, return_result=False):
     ret, thresh1 = cv2.threshold(image, threshold, 255, cv2.THRESH_BINARY)
     ret, thresh2 = cv2.threshold(image, threshold, 255, cv2.THRESH_BINARY_INV)
     ret, thresh3 = cv2.threshold(image, threshold, 255, cv2.THRESH_TRUNC)
     ret, thresh4 = cv2.threshold(image, threshold, 255, cv2.THRESH_TOZERO)
     ret, thresh5 = cv2.threshold(image, threshold, 255, cv2.THRESH_TOZERO_INV)
 
-    titles = ['Original Image', 'BINARY', 'BINARY_INV', 'TRUNC', 'TOZERO', 'TOZERO_INV']
-    images = [img, thresh1, thresh2, thresh3, thresh4, thresh5]
+    if show_result:
+        titles = ['Original Image', 'BINARY', 'BINARY_INV', 'TRUNC', 'TOZERO', 'TOZERO_INV']
+        images = [img, thresh1, thresh2, thresh3, thresh4, thresh5]
 
-    for i in range(6):
-        plt.subplot(2, 3, i + 1)
-        plt.imshow(images[i], 'gray')
-        plt.title(titles[i])
-        plt.xticks([])
-        plt.yticks([])
+        for i in range(6):
+            plt.subplot(2, 3, i + 1)
+            plt.imshow(images[i], 'gray')
+            plt.title(titles[i])
+            plt.xticks([])
+            plt.yticks([])
+        plt.show()
 
-    plt.show()
-    print(ret)
+    if return_result:
+        return thresh1
 
 
-def adaptive_threshold(image, blur=False):
+def adaptive_threshold(image, blur=False, show_result=False, return_result=False):
     if blur:
         image = cv2.bilateralFilter(image, 17, 35, 35)
     ret, th = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
     th_mean = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 35, 5)
     th_gaussian = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 35, 5)
-    titles = ['Original Image', 'Global Threshold', 'Adaptive Mean Threshold', 'Adaptive Gaussian Threshold']
-    images = [image, th, th_mean, th_gaussian]
 
-    for i in range(4):
-        plt.subplot(2, 2, i + 1)
-        plt.imshow(images[i], 'gray')
-        plt.title(titles[i])
-        plt.xticks([])
-        plt.yticks([])
+    if show_result:
+        titles = ['Original Image', 'Global Threshold', 'Adaptive Mean Threshold', 'Adaptive Gaussian Threshold']
+        images = [image, th, th_mean, th_gaussian]
 
-    plt.show()
+        for i in range(4):
+            plt.subplot(2, 2, i + 1)
+            plt.imshow(images[i], 'gray')
+            plt.title(titles[i])
+            plt.xticks([])
+            plt.yticks([])
+        plt.show()
+
+    if return_result:
+        return th_mean, th_gaussian
 
 
-def otsu_binarization(image, blur=False):
+def otsu(image, blur=False, show_result=False, return_result=False):
     if blur:
         image = cv2.GaussianBlur(image, (5, 5), 0)
+
     ret, th = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
     ret_otsu, th_otsu = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    titles = ['Original Image', 'Global Threshold', 'Otsu Binarization']
-    images = [image, th, th_otsu]
 
-    for i in range(3):
-        plt.subplot(3, 1, i + 1)
-        plt.imshow(images[i], cmap='gray')
-        plt.title(titles[i])
-        plt.xticks([])
-        plt.yticks([])
+    if show_result:
+        titles = ['Original Image', 'Global Threshold', 'Otsu Binarization']
+        images = [image, th, th_otsu]
 
-    plt.show()
-    print("Otsu's threshold is:", ret_otsu)
+        for i in range(3):
+            plt.subplot(3, 1, i + 1)
+            plt.imshow(images[i], cmap='gray')
+            plt.title(titles[i])
+            plt.xticks([])
+            plt.yticks([])
+        plt.show()
+        print("Otsu's threshold is:", ret_otsu)
+
+    if return_result:
+        return th_otsu
 
 
-def erosion(image, iterations):
-    kernel = np.ones(shape=(5, 5), dtype=np.uint8)
+def niblack_and_sauvola(image, window_size, show_result=False, return_result=False):
+    binary_global = image > threshold_otsu(image)
+
+    window_size = window_size
+    thresh_niblack = threshold_niblack(image, window_size=window_size, k=1)
+    thresh_sauvola = threshold_sauvola(image, window_size=window_size)
+
+    binary_niblack = image > thresh_niblack
+    binary_sauvola = image > thresh_sauvola
+
+    if show_result:
+        plt.subplot(2, 2, 1), plt.imshow(image, cmap='gray')
+        plt.title('Original'), plt.axis('off')
+        plt.subplot(2, 2, 2), plt.imshow(binary_global, cmap='gray')
+        plt.title('Global Threshold'), plt.axis('off')
+        plt.subplot(2, 2, 3), plt.imshow(binary_niblack, cmap='gray')
+        plt.title('Niblack Threshold'), plt.axis('off')
+        plt.subplot(2, 2, 4), plt.imshow(binary_sauvola, cmap='gray')
+        plt.title('Sauvola Threshold'), plt.axis('off')
+
+        plt.show()
+
+    if return_result:
+        return binary_niblack, binary_sauvola
+
+
+def canny(image, blur=False, show_result=False, return_result=False):
+    if blur:
+        image = cv2.GaussianBlur(image, (5, 5), 0)
+    edges = cv2.Canny(image, 140, 200)
+
+    if show_result:
+        plt.subplot(211), plt.imshow(image, cmap='gray')
+        plt.xticks([]), plt.yticks([])
+        plt.subplot(212), plt.imshow(edges, cmap='gray')
+        plt.xticks([]), plt.yticks([])
+        plt.show()
+
+    if return_result:
+        return edges
+
+
+def laplacian(image, show_result=False, return_result=False):
+    laplacian = cv2.Laplacian(image, cv2.CV_64F)
+
+    if show_result:
+        plt.subplot(211), plt.imshow(image, cmap='gray')
+        plt.xticks([]), plt.yticks([])
+        plt.subplot(212), plt.imshow(laplacian, cmap='gray')
+        plt.xticks([]), plt.yticks([])
+        plt.show()
+
+    if return_result:
+        return laplacian
+
+
+def erosion(image, kernel_size, iterations, show_result=False, return_result=False):
+    kernel = np.ones(shape=(kernel_size, kernel_size), dtype=np.uint8)
     eroded = cv2.erode(image, kernel, iterations=iterations)
-    plt.subplot(211), plt.imshow(image, cmap='gray')
-    plt.xticks([]), plt.yticks([])
-    plt.subplot(212), plt.imshow(eroded, cmap='gray')
-    plt.xticks([]), plt.yticks([])
-    plt.show()
+
+    if show_result:
+        plt.subplot(211), plt.imshow(image, cmap='gray')
+        plt.xticks([]), plt.yticks([])
+        plt.subplot(212), plt.imshow(eroded, cmap='gray')
+        plt.xticks([]), plt.yticks([])
+        plt.show()
+
+    if return_result:
+        return eroded
 
 
-def dilation(image, iterations):
-    kernel = np.ones(shape=(5, 5), dtype=np.uint8)
+def dilation(image, kernel_size, iterations, show_result=False, return_result=False):
+    kernel = np.ones(shape=(kernel_size, kernel_size), dtype=np.uint8)
     dilated = cv2.dilate(image, kernel, iterations=iterations)
-    plt.subplot(211), plt.imshow(image, cmap='gray')
-    plt.xticks([]), plt.yticks([])
-    plt.subplot(212), plt.imshow(dilated, cmap='gray')
-    plt.xticks([]), plt.yticks([])
-    plt.show()
+
+    if show_result:
+        plt.subplot(211), plt.imshow(image, cmap='gray')
+        plt.xticks([]), plt.yticks([])
+        plt.subplot(212), plt.imshow(dilated, cmap='gray')
+        plt.xticks([]), plt.yticks([])
+        plt.show()
+
+    if return_result:
+        return dilated
 
 
-img_address = "./test-images/female_27.bmp"
-tmp_address = "./test-images/female_35.bmp"
+### Load images ###
+img_address = "./test-images/T.jpg"
+# tmp_address = "./test-images/download.jpg"
 img = cv2.imread(img_address, 0)
-tmp = cv2.imread(tmp_address, 0)
-# img = img[120:330, 120:620]
+# tmp = cv2.imread(tmp_address, 0)
+
+### Do the processing tasks ###
 
 
-# equalized, both_images = equalize_histogram(image=img)
-adaptive_equalized = CLAHE(image=img)
-tmp_equalized = CLAHE(image=tmp)
-# double_equalized = CLAHE(image=adaptive_equalized)
-matched = match_histogram(source=img, template=tmp)
-
-# draw_histogram(image=img)
-# draw_histogram(image=src)
-# draw_histogram(image=adaptive_equalized)
-# draw_histogram(image=matched)
-
-adaptive_threshold(image=img)
-adaptive_threshold(image=tmp)
-adaptive_threshold(image=matched)
-
-# print(img.dtype)
-# print(tmp.dtype)
-# print(matched.dtype)
-
-# plt.subplot(311), plt.imshow(tmp, cmap='gray')
+### Plot the final result ###
+# plt.subplot(211), plt.imshow(img, cmap='gray')
 # plt.xticks([]), plt.yticks([])
-# plt.subplot(312), plt.imshow(img, cmap='gray')
-# plt.xticks([]), plt.yticks([])
-# plt.subplot(313), plt.imshow(matched, cmap='gray')
+# plt.subplot(212), plt.imshow(img, cmap='gray')
 # plt.xticks([]), plt.yticks([])
 # plt.show()
