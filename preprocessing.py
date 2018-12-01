@@ -196,6 +196,7 @@ def erosion(image, kernel_size, iterations, show_result=False, return_result=Fal
     eroded = cv2.erode(image, kernel, iterations=iterations)
 
     if show_result:
+        plt.figure(figsize=(10, 10))
         plt.subplot(211), plt.imshow(image, cmap='gray')
         plt.xticks([]), plt.yticks([])
         plt.subplot(212), plt.imshow(eroded, cmap='gray')
@@ -211,6 +212,7 @@ def dilation(image, kernel_size, iterations, show_result=False, return_result=Fa
     dilated = cv2.dilate(image, kernel, iterations=iterations)
 
     if show_result:
+        plt.figure(figsize=(10, 10))
         plt.subplot(211), plt.imshow(image, cmap='gray')
         plt.xticks([]), plt.yticks([])
         plt.subplot(212), plt.imshow(dilated, cmap='gray')
