@@ -43,7 +43,7 @@ def hierarchical(image, num_clusters):
     for l in range(num_clusters):
         cmap = plt.cm.get_cmap("Spectral")
         plt.contour(label == l, colors=[cmap(l / float(num_clusters)), ])
-    plt.title('KMeans with %d clusters' % num_clusters)
+    plt.title('Hierarchical with %d clusters' % num_clusters)
     plt.axis('off')
     plt.show()
 
