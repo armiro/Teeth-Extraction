@@ -2,17 +2,24 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-img = cv2.imread('./test-images/source.jpg', 0)
+def ishow(img):
+    plt.figure(figsize=(10, 10))
+    plt.imshow(img, cmap=plt.cm.gray)
 
-retVal = cv2.ximgproc.createRFFeatureGetter()
-res = cv2.ximgproc.createStructuredEdgeDetection()
+img = cv2.imread('./test-images/photo_2018-11-01_22-42-46.jpg',0)
+ishow(img)
 
 
-for l in range(5):
-    cmap = plt.cm.get_cmap("Spectral")
-    plt.contour(label == l, contours=1, colors=[cmap(l / float(n_clusters)), ])
-plt.axis('off')
-plt.show()
-# plt.subplot(2, 1, 1), plt.imshow(img, cmap='gray'), plt.axis('off')
-# plt.subplot(2, 1, 2), plt.imshow(retVal, cmap='gray'), plt.axis('off')
-# plt.show()
+from preprocessing import erosion
+from preprocessing import CLAHE
+
+
+ime = CLAHE(img)
+ishow(ime)
+
+ers = erosion(ime,5,1,False,True)
+ishow(ers)
+
+f = cv2.floodFill(ers,None,(0,0),255)
+ishow(ers)
+
