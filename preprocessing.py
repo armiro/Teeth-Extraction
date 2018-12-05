@@ -223,18 +223,81 @@ def dilation(image, kernel_size, iterations, show_result=False, return_result=Fa
         return dilated
 
 
-### Load images ###
-img_address = "./test-images/T.jpg"
-# tmp_address = "./test-images/download.jpg"
-img = cv2.imread(img_address, 0)
-# tmp = cv2.imread(tmp_address, 0)
+def quadtree_decomp(image, min_size, min_std, show_result=False, return_result=False):
 
-### Do the processing tasks ###
+    def split_image(image):
+        h, w = image.shape[0], image.shape[1]
+        off1X = 0
+        off1Y = 0
+        off2X = 0
+        off2Y = 0
 
+        if w >= h:  # split X
+            off1X = 0
+            off2X = int(w / 2)
+            img1 = image[0:h, 0:off2X]
+            img2 = image[0:h, off2X:w]
+        else:  # split Y
+            off1Y = 0
+            off2Y = int(h / 2)
+            img1 = image[0:off2Y, 0:w]
+            img2 = image[off2Y:h, 0:w]
 
-### Plot the final result ###
-# plt.subplot(211), plt.imshow(img, cmap='gray')
-# plt.xticks([]), plt.yticks([])
-# plt.subplot(212), plt.imshow(img, cmap='gray')
-# plt.xticks([]), plt.yticks([])
-# plt.show()
+        return off1X, off1Y, img1, off2X, off2Y, img2
+
+    def extract_roi(image, min_std, min_size, offX, offY, roi_list):
+        h, w = image.shape[0], image.shape[1]
+        m, s = cv2.meanStdDev(image)
+
+        if s >= min_std and max(h, w) > min_size:
+            oX1, oY1, im1, oX2, oY2, im2 = split_image(image)
+
+            extract_roi(im1, min_std, min_size, offX + oX1, offY + oY1, roi_list)
+            extract_roi(im2, min_std, min_size, offX + oX2, offY + oY2, roi_list)
+        else:
+            roi_list.append([offX, offY, w, h, m, s])
+
+        return roi_list
+
+    h, w = image.shape[0], image.shape[1]
+    input_image = image
+
+    # if not isinstance(input_image, type(None)):
+    #     if input_image.ndim > 1:
+    #         input_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
+    #     else:
+    #         pass
+    # else:
+    #     print('Error on input image: ', input_image)
+    #     exit()
+
+    roi_list = extract_roi(image=input_image, min_std=min_std, min_size=min_size, offX=0, offY=0, roi_list=list())
+    output_image = input_image.copy()
+    for roi in roi_list:
+        for element in range(0, len(roi)):
+            roi[element] = int(roi[element])
+        color = 255  # white color
+        if roi[5] < min_std:
+            color = 0  # black color
+
+        cv2.rectangle(output_image, (roi[0], roi[1]), (roi[0] + roi[2], roi[1] + roi[3]), color, 1)
+
+    if show_result:
+        if w > h:
+            plt.subplot(211)
+        else:
+            plt.subplot(121)
+        plt.imshow(image, cmap='gray')
+        plt.xticks([]), plt.yticks([])
+
+        if w > h:
+            plt.subplot(212)
+        else:
+            plt.subplot(122)
+        plt.imshow(output_image, cmap='gray')
+        plt.xticks([]), plt.yticks([])
+        plt.show()
+
+    if return_result:
+        return output_image
+
