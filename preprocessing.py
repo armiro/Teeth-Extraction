@@ -59,8 +59,8 @@ def equalize_histogram(image):
     return equ, res
 
 
-def CLAHE(image):
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+def CLAHE(image, clip_limit=2.0, grid_size=8):
+    clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=(grid_size, grid_size))
     adaptive_equalized = clahe.apply(image)
     return adaptive_equalized
 
@@ -74,7 +74,7 @@ def global_threshold(image, threshold, show_result=False, return_result=False):
 
     if show_result:
         titles = ['Original Image', 'BINARY', 'BINARY_INV', 'TRUNC', 'TOZERO', 'TOZERO_INV']
-        images = [img, thresh1, thresh2, thresh3, thresh4, thresh5]
+        images = [image, thresh1, thresh2, thresh3, thresh4, thresh5]
 
         for i in range(6):
             plt.subplot(2, 3, i + 1)
@@ -135,7 +135,7 @@ def otsu(image, blur=False, show_result=False, return_result=False):
         return th_otsu
 
 
-def niblack_and_sauvola(image, window_size, show_result=False, return_result=False):
+def niblack_and_sauvola(image, window_size=8, show_result=False, return_result=False):
     binary_global = image > threshold_otsu(image)
 
     window_size = window_size
@@ -191,7 +191,7 @@ def laplacian(image, show_result=False, return_result=False):
         return laplacian
 
 
-def erosion(image, kernel_size, iterations, show_result=False, return_result=False):
+def erosion(image, kernel_size=8, iterations=2, show_result=False, return_result=False):
     kernel = np.ones(shape=(kernel_size, kernel_size), dtype=np.uint8)
     eroded = cv2.erode(image, kernel, iterations=iterations)
 
@@ -207,7 +207,7 @@ def erosion(image, kernel_size, iterations, show_result=False, return_result=Fal
         return eroded
 
 
-def dilation(image, kernel_size, iterations, show_result=False, return_result=False):
+def dilation(image, kernel_size=8, iterations=2, show_result=False, return_result=False):
     kernel = np.ones(shape=(kernel_size, kernel_size), dtype=np.uint8)
     dilated = cv2.dilate(image, kernel, iterations=iterations)
 
