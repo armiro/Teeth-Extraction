@@ -47,6 +47,3 @@ def hierarchical(image, num_clusters):
     plt.axis('off')
     plt.show()
 
-
-# img = cv2.imread('./test-images/T.jpg', 0)
-# hierarchical(image=img, num_clusters=3)

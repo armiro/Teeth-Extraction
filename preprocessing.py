@@ -59,8 +59,8 @@ def equalize_histogram(image):
     return equ, res
 
 
-def CLAHE(image):
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+def CLAHE(image, clip_limit=2.0, grid_size=8):
+    clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=(grid_size, grid_size))
     adaptive_equalized = clahe.apply(image)
     return adaptive_equalized
 
@@ -74,7 +74,7 @@ def global_threshold(image, threshold, show_result=False, return_result=False):
 
     if show_result:
         titles = ['Original Image', 'BINARY', 'BINARY_INV', 'TRUNC', 'TOZERO', 'TOZERO_INV']
-        images = [img, thresh1, thresh2, thresh3, thresh4, thresh5]
+        images = [image, thresh1, thresh2, thresh3, thresh4, thresh5]
 
         for i in range(6):
             plt.subplot(2, 3, i + 1)
@@ -135,7 +135,7 @@ def otsu(image, blur=False, show_result=False, return_result=False):
         return th_otsu
 
 
-def niblack_and_sauvola(image, window_size, show_result=False, return_result=False):
+def niblack_and_sauvola(image, window_size=8, show_result=False, return_result=False):
     binary_global = image > threshold_otsu(image)
 
     window_size = window_size
@@ -191,7 +191,7 @@ def laplacian(image, show_result=False, return_result=False):
         return laplacian
 
 
-def erosion(image, kernel_size, iterations, show_result=False, return_result=False):
+def erosion(image, kernel_size=8, iterations=2, show_result=False, return_result=False):
     kernel = np.ones(shape=(kernel_size, kernel_size), dtype=np.uint8)
     eroded = cv2.erode(image, kernel, iterations=iterations)
 
@@ -207,7 +207,7 @@ def erosion(image, kernel_size, iterations, show_result=False, return_result=Fal
         return eroded
 
 
-def dilation(image, kernel_size, iterations, show_result=False, return_result=False):
+def dilation(image, kernel_size=8, iterations=2, show_result=False, return_result=False):
     kernel = np.ones(shape=(kernel_size, kernel_size), dtype=np.uint8)
     dilated = cv2.dilate(image, kernel, iterations=iterations)
 
@@ -223,18 +223,81 @@ def dilation(image, kernel_size, iterations, show_result=False, return_result=Fa
         return dilated
 
 
-### Load images ###
-img_address = "./test-images/T.jpg"
-# tmp_address = "./test-images/download.jpg"
-img = cv2.imread(img_address, 0)
-# tmp = cv2.imread(tmp_address, 0)
+def quadtree_decomp(image, min_size, min_std, show_result=False, return_result=False):
 
-### Do the processing tasks ###
+    def split_image(image):
+        h, w = image.shape[0], image.shape[1]
+        off1X = 0
+        off1Y = 0
+        off2X = 0
+        off2Y = 0
 
+        if w >= h:  # split X
+            off1X = 0
+            off2X = int(w / 2)
+            img1 = image[0:h, 0:off2X]
+            img2 = image[0:h, off2X:w]
+        else:  # split Y
+            off1Y = 0
+            off2Y = int(h / 2)
+            img1 = image[0:off2Y, 0:w]
+            img2 = image[off2Y:h, 0:w]
 
-### Plot the final result ###
-# plt.subplot(211), plt.imshow(img, cmap='gray')
-# plt.xticks([]), plt.yticks([])
-# plt.subplot(212), plt.imshow(img, cmap='gray')
-# plt.xticks([]), plt.yticks([])
-# plt.show()
+        return off1X, off1Y, img1, off2X, off2Y, img2
+
+    def extract_roi(image, min_std, min_size, offX, offY, roi_list):
+        h, w = image.shape[0], image.shape[1]
+        m, s = cv2.meanStdDev(image)
+
+        if s >= min_std and max(h, w) > min_size:
+            oX1, oY1, im1, oX2, oY2, im2 = split_image(image)
+
+            extract_roi(im1, min_std, min_size, offX + oX1, offY + oY1, roi_list)
+            extract_roi(im2, min_std, min_size, offX + oX2, offY + oY2, roi_list)
+        else:
+            roi_list.append([offX, offY, w, h, m, s])
+
+        return roi_list
+
+    h, w = image.shape[0], image.shape[1]
+    input_image = image
+
+    # if not isinstance(input_image, type(None)):
+    #     if input_image.ndim > 1:
+    #         input_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
+    #     else:
+    #         pass
+    # else:
+    #     print('Error on input image: ', input_image)
+    #     exit()
+
+    roi_list = extract_roi(image=input_image, min_std=min_std, min_size=min_size, offX=0, offY=0, roi_list=list())
+    output_image = input_image.copy()
+    for roi in roi_list:
+        for element in range(0, len(roi)):
+            roi[element] = int(roi[element])
+        color = 255  # white color
+        if roi[5] < min_std:
+            color = 0  # black color
+
+        cv2.rectangle(output_image, (roi[0], roi[1]), (roi[0] + roi[2], roi[1] + roi[3]), color, 1)
+
+    if show_result:
+        if w > h:
+            plt.subplot(211)
+        else:
+            plt.subplot(121)
+        plt.imshow(image, cmap='gray')
+        plt.xticks([]), plt.yticks([])
+
+        if w > h:
+            plt.subplot(212)
+        else:
+            plt.subplot(122)
+        plt.imshow(output_image, cmap='gray')
+        plt.xticks([]), plt.yticks([])
+        plt.show()
+
+    if return_result:
+        return output_image
+
