@@ -135,30 +135,34 @@ def otsu(image, blur=False, show_result=False, return_result=False):
         return th_otsu
 
 
-def niblack_and_sauvola(image, window_size=8, show_result=False, return_result=False):
+def niblack(image, window_size, k, show_result=False, return_result=False):
     binary_global = image > threshold_otsu(image)
-
-    window_size = window_size
-    thresh_niblack = threshold_niblack(image, window_size=window_size, k=1)
-    thresh_sauvola = threshold_sauvola(image, window_size=window_size)
-
+    thresh_niblack = threshold_niblack(image, window_size=window_size, k=k)
     binary_niblack = image > thresh_niblack
-    binary_sauvola = image > thresh_sauvola
 
     if show_result:
-        plt.subplot(2, 2, 1), plt.imshow(image, cmap='gray')
-        plt.title('Original'), plt.axis('off')
-        plt.subplot(2, 2, 2), plt.imshow(binary_global, cmap='gray')
-        plt.title('Global Threshold'), plt.axis('off')
-        plt.subplot(2, 2, 3), plt.imshow(binary_niblack, cmap='gray')
-        plt.title('Niblack Threshold'), plt.axis('off')
-        plt.subplot(2, 2, 4), plt.imshow(binary_sauvola, cmap='gray')
-        plt.title('Sauvola Threshold'), plt.axis('off')
-
+        plt.subplot(3, 1, 1), plt.imshow(image, cmap='gray'), plt.title('Original'), plt.axis('off')
+        plt.subplot(3, 1, 2), plt.imshow(binary_global, cmap='gray'), plt.title('Global Threshold'), plt.axis('off')
+        plt.subplot(3, 1, 3), plt.imshow(binary_niblack, cmap='gray'), plt.title('Niblack Threshold'), plt.axis('off')
         plt.show()
 
     if return_result:
-        return binary_niblack, binary_sauvola
+        return binary_niblack
+
+
+def sauvola(image, window_size, show_result=False, return_result=False):
+    binary_global = image > threshold_otsu(image)
+    thresh_sauvola = threshold_sauvola(image, window_size=window_size)
+    binary_sauvola = image > thresh_sauvola
+
+    if show_result:
+        plt.subplot(3, 1, 1), plt.imshow(image, cmap='gray'), plt.title('Original'), plt.axis('off')
+        plt.subplot(3, 1, 2), plt.imshow(binary_global, cmap='gray'), plt.title('Global Threshold'), plt.axis('off')
+        plt.subplot(3, 1, 3), plt.imshow(binary_sauvola, cmap='gray'), plt.title('Sauvola Threshold'), plt.axis('off')
+        plt.show()
+
+    if return_result:
+        return binary_sauvola
 
 
 def canny(image, blur=False, show_result=False, return_result=False):
