@@ -119,9 +119,11 @@ def detect_lower_boundary(image, left_boundary):
 
 def detect_upper_boundary(image, left_boundary):
     # use a matrix as the kernel to find white-to-black horizontal edges
-    horizontal_edge_detector = [[-2, -2, -2],
-                                [0,  0,  0],
-                                [2,  2,  2]]
+    horizontal_edge_detector = [[-2, -2, -2, -2, -2],
+                                [0,  0,  0, 0, 0],
+                                [0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0],
+                                [2,  2,  2, 2, 2]]
     h_kernel = np.array(horizontal_edge_detector, dtype=np.float32) / 1.0
     h_edges = cv2.filter2D(image, -1, h_kernel)
     h_edges = cv2.bilateralFilter(h_edges, 45, 75, 75)
