@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import itertools
 
 def ishow(img):
     plt.figure(figsize=(10, 10))
@@ -14,7 +15,7 @@ def integral(img):
     integral = integral - img[0,:] 
     return integral
 
-img = cv2.imread('./test-images/female_35.bmp',0)
+img = cv2.imread('./test-images/female_35_crop.jpg',0)
 ishow(img)
 #img2 = cv2.imread('./test-images/male_19.bmp',0)
 #ishow(img2)
@@ -24,39 +25,41 @@ from preprocessing import match_histogram as mh
 from preprocessing import adaptive_threshold as at
 from preprocessing import otsu
 from preprocessing import laplacian
-atimg = at(img,True,True,True)
-ishow(atimg[0])
-ishow(erosion(atimg[0],5,2,False,True))
+from preprocessing import niblack_and_sauvola
+# CLAHE
+img = CLAHE(img)
+ishow(img)
 
-ime = CLAHE(img)
-ishow(ime)
-ot = otsu(ime,1,1,1)
-ishow(ot)
-imgup = CLAHE(cv2.imread('Up.jpg',0),30)
-ishow(imgup)
+#Binary
 
-imgdown = CLAHE(cv2.imread('down.jpg',0),5)
-ishow(imgdown)
-ers = erosion(imgup,5,5,False,True)
-ishow(ers)
+nb,sa = niblack_and_sauvola(img,91,0,1)
 
-integ1 = np.sum(imgup,axis = 0)
-plt.plot(integ)
-print("....")
-integ2 = np.sum(ers,axis = 0)
-plt.plot(integ2)
-#f = cv2.floodFill(ers,None,(0,0),255)
-#ishow(ers)
-plt.plot(integ1 - integ2)
+ishow(nb)
+ishow(sa)
 
-#match = mh(img,img2)
-#ishow(match)
+black_classes = np.zeros([len(sa),len(sa[0])])
+for ii in range(len(sa)):
+    for jj in range(len(sa[0])):
+        if sa[ii,jj] == 0:
+            print(ii,jj)
+            first_black = [ii,jj]
+            break
+    if sa[ii,jj] == 0:
+        break   
+black_group = [first_black]
 
-lap = (laplacian(ime,1,1))
+center = [1,16]
+for ii in range(3):
+    ii = ii-1
+    for jj in range(3):
+        jj = jj-1        
+        if sa[center[0]+ii,center[1]+jj] == False:
+           black_group.append([center[0]+ii,center[1]+jj]) 
 
-maxi = np.max(lap)
-mini = np.min(lap)
-lap = np.round((lap - mini)/(maxi-mini)*255)
-ishow(CLAHE(lap))
-#cluster.kmeans(imgaeq,3)
-#cluster.hierarchical(imgaeq,3)
+k=black_group
+k.sort()
+black_group = list(k for k,_ in itertools.groupby(k))
+     
+for pixel in black_group:
+    sa[pixel] = True
+ishow(sa)
