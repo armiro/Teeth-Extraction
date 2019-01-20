@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import itertools
 
 def ishow(img):
     plt.figure(figsize=(10, 10))
@@ -14,7 +15,7 @@ def integral(img):
     integral = integral - img[0,:] 
     return integral
 
-img = cv2.imread('./test-images/female_35.bmp',0)
+img = cv2.imread('./test-images/female_35_crop.jpg',0)
 ishow(img)
 #img2 = cv2.imread('./test-images/male_19.bmp',0)
 #ishow(img2)
@@ -24,39 +25,61 @@ from preprocessing import match_histogram as mh
 from preprocessing import adaptive_threshold as at
 from preprocessing import otsu
 from preprocessing import laplacian
-atimg = at(img,True,True,True)
-ishow(atimg[0])
-ishow(erosion(atimg[0],5,2,False,True))
+from preprocessing import niblack
+from preprocessing import sauvola
 
-ime = CLAHE(img)
-ishow(ime)
-ot = otsu(ime,1,1,1)
-ishow(ot)
-imgup = CLAHE(cv2.imread('Up.jpg',0),30)
-ishow(imgup)
 
-imgdown = CLAHE(cv2.imread('down.jpg',0),5)
-ishow(imgdown)
-ers = erosion(imgup,5,5,False,True)
-ishow(ers)
 
-integ1 = np.sum(imgup,axis = 0)
-plt.plot(integ)
-print("....")
-integ2 = np.sum(ers,axis = 0)
-plt.plot(integ2)
-#f = cv2.floodFill(ers,None,(0,0),255)
-#ishow(ers)
-plt.plot(integ1 - integ2)
+# CLAHE
+img = CLAHE(img)
+#ishow(img)
 
-#match = mh(img,img2)
-#ishow(match)
+#Binary
 
-lap = (laplacian(ime,1,1))
+sa = sauvola(img,91,0,1)
+sa = np.invert(sa)
+sa = np.array(sa,dtype = 'uint8')
+nb = niblack(img,91,1,0,1)
+#ishow(nb)
+#ishow(sa)
 
-maxi = np.max(lap)
-mini = np.min(lap)
-lap = np.round((lap - mini)/(maxi-mini)*255)
-ishow(CLAHE(lap))
-#cluster.kmeans(imgaeq,3)
-#cluster.hierarchical(imgaeq,3)
+#Labels
+retval, labels = cv2.connectedComponents(sa)  
+   
+sa = sauvola(img,91,0,1)
+sa = np.array(sa,dtype = 'uint8')
+
+hist=np.histogram(labels,retval)[0]
+noise= list()
+th = 20
+hist_copy = np.copy(hist)
+hist_copy = sorted(hist_copy,reverse = True)
+th = hist_copy [5]
+
+for ii in range(len(hist)):
+    if hist[ii]>th:
+        noise.append(ii)
+gaps = np.ones([len(sa),len(sa[0])],np.bool)
+#for ii in range(len(sa)):
+#    for jj in range((len(sa[0]))):
+#        if labels[ii,jj] != 0:
+#            for kk in range(len(hist)):
+#                if labels[ii,jj] == hist[kk]:
+#                    gaps[ii,jj] = True
+
+noise = noise[1:]
+for ii in range(len(sa)): 
+    print("---------",ii)
+    for num in noise:
+        indexes = [i for i, j in enumerate(labels[ii]) if j == num] 
+        for jj in indexes:
+            gaps[ii,jj] = False
+            print(jj)
+
+            
+ishow(gaps)           
+    
+               
+              
+
+
