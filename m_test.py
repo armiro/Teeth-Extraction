@@ -25,41 +25,61 @@ from preprocessing import match_histogram as mh
 from preprocessing import adaptive_threshold as at
 from preprocessing import otsu
 from preprocessing import laplacian
-from preprocessing import niblack_and_sauvola
+from preprocessing import niblack
+from preprocessing import sauvola
+
+
+
 # CLAHE
 img = CLAHE(img)
-ishow(img)
+#ishow(img)
 
 #Binary
 
-nb,sa = niblack_and_sauvola(img,91,0,1)
+sa = sauvola(img,91,0,1)
+sa = np.invert(sa)
+sa = np.array(sa,dtype = 'uint8')
+nb = niblack(img,91,1,0,1)
+#ishow(nb)
+#ishow(sa)
 
-ishow(nb)
-ishow(sa)
+#Labels
+retval, labels = cv2.connectedComponents(sa)  
+   
+sa = sauvola(img,91,0,1)
+sa = np.array(sa,dtype = 'uint8')
 
-black_classes = np.zeros([len(sa),len(sa[0])])
-for ii in range(len(sa)):
-    for jj in range(len(sa[0])):
-        if sa[ii,jj] == 0:
-            print(ii,jj)
-            first_black = [ii,jj]
-            break
-    if sa[ii,jj] == 0:
-        break   
-black_group = [first_black]
+hist=np.histogram(labels,retval)[0]
+noise= list()
+th = 20
+hist_copy = np.copy(hist)
+hist_copy = sorted(hist_copy,reverse = True)
+th = hist_copy [5]
 
-center = [1,16]
-for ii in range(3):
-    ii = ii-1
-    for jj in range(3):
-        jj = jj-1        
-        if sa[center[0]+ii,center[1]+jj] == False:
-           black_group.append([center[0]+ii,center[1]+jj]) 
+for ii in range(len(hist)):
+    if hist[ii]>th:
+        noise.append(ii)
+gaps = np.ones([len(sa),len(sa[0])],np.bool)
+#for ii in range(len(sa)):
+#    for jj in range((len(sa[0]))):
+#        if labels[ii,jj] != 0:
+#            for kk in range(len(hist)):
+#                if labels[ii,jj] == hist[kk]:
+#                    gaps[ii,jj] = True
 
-k=black_group
-k.sort()
-black_group = list(k for k,_ in itertools.groupby(k))
-     
-for pixel in black_group:
-    sa[pixel] = True
-ishow(sa)
+noise = noise[1:]
+for ii in range(len(sa)): 
+    print("---------",ii)
+    for num in noise:
+        indexes = [i for i, j in enumerate(labels[ii]) if j == num] 
+        for jj in indexes:
+            gaps[ii,jj] = False
+            print(jj)
+
+            
+ishow(gaps)           
+    
+               
+              
+
+
