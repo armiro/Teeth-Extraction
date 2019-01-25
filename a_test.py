@@ -34,12 +34,12 @@ v_kernel = np.array(vertical_edge_detector, dtype=np.float32) / 1.0
 left_edge = cv2.filter2D(img_resized, -1, v_kernel)
 """end"""
 
-left_edge = preprocessing.dilation(image=left_edge, kernel_size=5, iterations=3, return_result=1)
+left_edge = preprocessing.dilation(image=left_edge, kernel_size=10, iterations=2, return_result=1)
 # img = cv2.blur(img, (15, 15))
 
 sum_array = list()
 for line_idx in range(resized_width):
-    line = left_edge[:, line_idx]
+    line = left_edge[:int(resized_height/2), line_idx]
     sum_array.append(sum(line))
 
 mean = int(np.mean(a=sum_array))
@@ -70,12 +70,12 @@ v_kernel = np.array(vertical_edge_detector, dtype=np.float32) / 1.0
 right_edge = cv2.filter2D(img_resized, -1, v_kernel)
 """end"""
 
-right_edge = preprocessing.dilation(image=right_edge, kernel_size=5, iterations=3, return_result=1)
+right_edge = preprocessing.dilation(image=right_edge, kernel_size=10, iterations=2, return_result=1)
 # img = cv2.blur(img, (15, 15))
 
 sum_array = list()
 for line_idx in range(resized_width):
-    line = right_edge[:, line_idx]
+    line = right_edge[:int(resized_height/2), line_idx]
     sum_array.append(sum(line))
 
 
@@ -87,8 +87,8 @@ cv2.line(img, (right_eoi, 0), (right_eoi, height), 0, linewidth)
 # cv2.line(img_resized, (sum_element, 0), (sum_element, resized_height), 0, linewidth)
 print("right eoi is:", right_eoi)
 
-plt.imshow(X=img_resized, cmap='gray')
-plt.show()
+# plt.imshow(X=img_resized, cmap='gray')
+# plt.show()
 
 plt.imshow(X=img, cmap='gray')
 plt.show()
