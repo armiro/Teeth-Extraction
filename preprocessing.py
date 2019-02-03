@@ -305,3 +305,40 @@ def quadtree_decomp(image, min_size, min_std, show_result=False, return_result=F
     if return_result:
         return output_image
 
+
+def imfill(image, threshold, show_result=False, return_result=False):
+    sa = sauvola(image=image, window_size=91, show_result=False, return_result=True)
+    sa_inv = np.invert(sa)
+    sa_inv = np.array(sa_inv, dtype='uint8')
+
+    retval, labels = cv2.connectedComponents(sa_inv)
+
+    hist = np.histogram(labels, retval)[0]
+    noise = list()
+    hist_copy = np.copy(hist)
+    hist_copy = sorted(hist_copy, reverse=True)
+    th = hist_copy[threshold]
+
+    for ii in range(len(hist)):
+        if hist[ii] > th:
+            noise.append(ii)
+    gaps = np.ones([len(sa_inv), len(sa_inv[0])], np.bool)
+
+    noise = noise[1:]
+    for ii in range(len(sa_inv)):
+        # print("---------", ii)
+        for num in noise:
+            indexes = [i for i, j in enumerate(labels[ii]) if j == num]
+            for jj in indexes:
+                gaps[ii, jj] = False
+                # print(jj)
+
+    if show_result:
+        plt.subplot(3, 1, 1), plt.imshow(X=image, cmap='gray'), plt.axis('off')
+        plt.subplot(3, 1, 2), plt.imshow(X=sa, cmap='gray'), plt.axis('off')
+        plt.subplot(3, 1, 3), plt.imshow(X=gaps, cmap='gray'), plt.axis('off')
+        plt.show()
+
+    if return_result:
+        return gaps
+
