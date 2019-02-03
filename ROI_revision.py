@@ -8,7 +8,7 @@ import copy
 
 def revise_horizontal_boundaries(image, show_result=False, return_result=False):
     height, width = image.shape[0], image.shape[1]
-    print("image dimensions are:", image.shape)
+    # print("image dimensions are:", image.shape)
     # img = preprocessing.CLAHE(image=img)
     tmp = copy.deepcopy(x=image)
     desired_kernel_size = int(width / 80) * 2 + 1
@@ -82,7 +82,7 @@ def revise_vertical_boundaries(image, show_result=False, return_result=False):
     tmp = copy.deepcopy(x=image)
     tmp = preprocessing.CLAHE(image=tmp, clip_limit=2., grid_size=8)
     height, width = tmp.shape[0], tmp.shape[1]
-    print("image shape is:", tmp.shape)
+    # print("image shape is:", tmp.shape)
     resized_img = cv2.resize(tmp, (0, 0), fx=(500 / width), fy=(200 / height))
 
     resized_height, resized_width = resized_img.shape[0], resized_img.shape[1]
@@ -114,7 +114,7 @@ def revise_vertical_boundaries(image, show_result=False, return_result=False):
 
     cv2.line(tmp, (left_eoi, 0), (left_eoi, height), 0, linewidth)
     # cv2.line(resized_img, (sum_element, 0), (sum_element, resized_height), 0, linewidth)
-    print("left eoi is:", left_eoi)
+    # print("left eoi is:", left_eoi)
 
     """vertical edges filter: right boundary"""
     vertical_edge_detector = np.zeros(shape=(3, 3))
@@ -138,7 +138,7 @@ def revise_vertical_boundaries(image, show_result=False, return_result=False):
 
     cv2.line(tmp, (right_eoi, 0), (right_eoi, height), 0, linewidth)
     # cv2.line(img_resized, (sum_element, 0), (sum_element, resized_height), 0, linewidth)
-    print("right eoi is:", right_eoi)
+    # print("right eoi is:", right_eoi)
 
     image = image[:, left_eoi:right_eoi]
 
@@ -149,4 +149,22 @@ def revise_vertical_boundaries(image, show_result=False, return_result=False):
 
     if return_result:
         return image
+
+
+def revise_boundaries(image, show_result=False, return_result=False):
+
+    h_rev = revise_horizontal_boundaries(image=image, return_result=True)
+    revised_roi = revise_vertical_boundaries(image=h_rev, return_result=True)
+
+    # plot the result as well as the input image
+    if show_result:
+        plt.subplot(211), plt.imshow(image, cmap='gray')
+        plt.xticks([]), plt.yticks([])
+        plt.subplot(212), plt.imshow(revised_roi, cmap='gray')
+        plt.xticks([]), plt.yticks([])
+        plt.show()
+
+    if return_result:
+        return revised_roi
+
 
