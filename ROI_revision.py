@@ -47,7 +47,7 @@ def revise_horizontal_boundaries(image, show_result=False, return_result=False):
         plt.show()
 
     if return_result:
-        return image
+        return image, lower_bound, upper_bound
 
 
 def revise_vertical_boundaries(image, show_result=False, return_result=False):
@@ -148,13 +148,14 @@ def revise_vertical_boundaries(image, show_result=False, return_result=False):
         plt.show()
 
     if return_result:
-        return image
+        return image, left_eoi, right_eoi
 
 
 def revise_boundaries(image, show_result=False, return_result=False):
 
-    h_rev = revise_horizontal_boundaries(image=image, return_result=True)
-    revised_roi = revise_vertical_boundaries(image=h_rev, return_result=True)
+    h_rev, lower_boundary, upper_boundary = revise_horizontal_boundaries(image=image, return_result=True)
+    revised_roi, left_boundary, right_boundary = revise_vertical_boundaries(image=h_rev, return_result=True)
+    boundaries = [left_boundary, right_boundary, lower_boundary, upper_boundary]
 
     # plot the result as well as the input image
     if show_result:
@@ -165,6 +166,6 @@ def revise_boundaries(image, show_result=False, return_result=False):
         plt.show()
 
     if return_result:
-        return revised_roi
+        return revised_roi, boundaries
 
 

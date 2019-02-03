@@ -25,7 +25,7 @@ def detect_left_boundary(image):
     # find the average intensity of all the pixels in the left window
     left_quarter = v_edges[:, left_window_open:left_window_close]
     mean_intensity_left = float(round(left_quarter.mean(), 2))
-    print("average intensity of left-window is:", mean_intensity_left)
+    # print("average intensity of left-window is:", mean_intensity_left)
 
     # find the intensity of all the image columns residing inside the left window
     intensity_list = list(sum(v_edges[:, left_window_open:left_window_close]))
@@ -92,7 +92,7 @@ def detect_lower_boundary(image, left_boundary):
     # find the intensity of all the image rows residing inside the lower window
     lower_quarter = h_edges[lower_window_open:lower_window_close, left_boundary]
     mean_intensity_lower = float(round(lower_quarter.mean(), 2))
-    print("average intensity of lower-window is:", mean_intensity_lower)
+    # print("average intensity of lower-window is:", mean_intensity_lower)
 
     # define initial value of required variables
     ml = mean_intensity_lower
@@ -141,7 +141,7 @@ def detect_upper_boundary(image, left_boundary):
     # find the intensity of all the image pixels residing inside the upper window of our column of interest
     upper_quarter = column_of_interest[upper_window_open:upper_window_close]
     mean_intensity_upper = float(round(upper_quarter.mean(), 2))
-    print("average intensity of upper-window is:", mean_intensity_upper)
+    # print("average intensity of upper-window is:", mean_intensity_upper)
 
     # define initial value of required variables
     mp = mean_intensity_upper
@@ -167,7 +167,7 @@ def detect_upper_boundary(image, left_boundary):
 
 def extract_roi(image, return_result=False, show_result=False):
     # at first, load the image and do the CLAHE as the pre-processing step
-    print("image dimensions are:", image.shape)
+    # print("image dimensions are:", image.shape)
     adaptive_equalized = CLAHE(image=image, clip_limit=2.0, grid_size=8)
 
     # then, extract the desired boundaries
@@ -177,7 +177,7 @@ def extract_roi(image, return_result=False, show_result=False):
     upper_boundary = detect_upper_boundary(image=adaptive_equalized, left_boundary=left_boundary)
 
     roi = image[upper_boundary:lower_boundary, left_boundary:right_boundary]
-
+    boundaries = [left_boundary, right_boundary, lower_boundary, upper_boundary]
     # plot the result as well as the input image
     if show_result:
         plt.subplot(211), plt.imshow(adaptive_equalized, cmap='gray')
@@ -187,5 +187,5 @@ def extract_roi(image, return_result=False, show_result=False):
         plt.show()
 
     if return_result:
-        return roi
+        return roi, boundaries
 
