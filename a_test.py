@@ -6,7 +6,7 @@ from ROI_revision import *
 from ROI_extraction import *
 from tooth_extraction import draw_middle_line
 
-for i in range(1, 51):
+for i in range(1, 2):
     img_address = './images/%d.bmp' % i
     img = cv2.imread(img_address, 0)
     print('original image dimensions:', img.shape)
@@ -44,7 +44,7 @@ for i in range(1, 51):
     plt.subplot(2, 1, 2), plt.imshow(X=revised_roi, cmap='gray')
     plt.show()
 
-    file_name = './cropped-figures/%d' % i
-    fig.savefig(file_name)
+    # file_name = './cropped-figures/%d' % i
+    # fig.savefig(file_name)
 
     # cv2.imwrite('test-auto-cropped/10.bmp', revised_roi)
