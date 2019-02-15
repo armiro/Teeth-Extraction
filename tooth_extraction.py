@@ -142,7 +142,7 @@ def draw_middle_line(image, num_parts, show_result=False, return_result=False):
             mid_y.append(point[1])
     starting_y = int(np.mean(a=mid_y))
     supposed_starting_point = (starting_x, starting_y)
-    # print(supposed_starting_point)
+    print(supposed_starting_point)
     # cv2.circle(image=image, center=starting_point, radius=5, color=(255, 0, 0), thickness=-1)
 
     # middle_dots = np.asarray(a=middle_dots)
@@ -152,12 +152,13 @@ def draw_middle_line(image, num_parts, show_result=False, return_result=False):
     for point in middle_dots:
         if (point[0] > (starting_x - x_bound)) & (point[0] < (starting_x + x_bound)):
             distances.append((point[1] - starting_y) ** 2)
-    # print(distances)
+    print(distances)
     nearest = np.argmin(a=distances)
-    # print(nearest)
+    print(nearest)
     poi_idx = int(nearest + int((starting_x - x_bound) / window_size))
     # print(middle_dots[poi])
     poi = middle_dots[poi_idx]
+    print(poi)
     # point_of_interest_y = tmp_2[np.argmin(a=distances)]
     # point_of_interest = middle_dots.index(point_of_interest_y)
     # cv2.circle(image=image, center=poi, radius=4, color=(255, 0, 0), thickness=-1)
@@ -221,4 +222,5 @@ def draw_middle_line(image, num_parts, show_result=False, return_result=False):
 
     if return_result:
         return image
+
 
