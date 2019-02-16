@@ -1,85 +1,48 @@
 import cv2
-import numpy as np
-import matplotlib.pyplot as plt
-import itertools
-
-def ishow(img):
-    plt.figure(figsize=(10, 10))
-    plt.imshow(img, cmap=plt.cm.gray)
-    
-    
-def integral(img):
-    integral = img[0,:]
-    for ii in range(len(img)):
-        integral = integral + img[ii,:]
-    integral = integral - img[0,:] 
-    return integral
-
-img = cv2.imread('./test-images/female_35_crop.jpg',0)
-ishow(img)
-#img2 = cv2.imread('./test-images/male_19.bmp',0)
-#ishow(img2)
-from preprocessing import erosion
-from preprocessing import CLAHE
-from preprocessing import match_histogram as mh
-from preprocessing import adaptive_threshold as at
-from preprocessing import otsu
-from preprocessing import laplacian
-from preprocessing import niblack
-from preprocessing import sauvola
+import copy
+import csv
 
 
-
-# CLAHE
-img = CLAHE(img)
-#ishow(img)
-
-#Binary
-
-sa = sauvola(img,91,0,1)
-sa = np.invert(sa)
-sa = np.array(sa,dtype = 'uint8')
-nb = niblack(img,91,1,0,1)
-#ishow(nb)
-#ishow(sa)
-
-#Labels
-retval, labels = cv2.connectedComponents(sa)  
-   
-sa = sauvola(img,91,0,1)
-sa = np.array(sa,dtype = 'uint8')
-
-hist=np.histogram(labels,retval)[0]
-noise= list()
-th = 20
-hist_copy = np.copy(hist)
-hist_copy = sorted(hist_copy,reverse = True)
-th = hist_copy [5]
-
-for ii in range(len(hist)):
-    if hist[ii]>th:
-        noise.append(ii)
-gaps = np.ones([len(sa),len(sa[0])],np.bool)
-#for ii in range(len(sa)):
-#    for jj in range((len(sa[0]))):
-#        if labels[ii,jj] != 0:
-#            for kk in range(len(hist)):
-#                if labels[ii,jj] == hist[kk]:
-#                    gaps[ii,jj] = True
-
-noise = noise[1:]
-for ii in range(len(sa)): 
-    print("---------",ii)
-    for num in noise:
-        indexes = [i for i, j in enumerate(labels[ii]) if j == num] 
-        for jj in indexes:
-            gaps[ii,jj] = False
-            print(jj)
-
-            
-ishow(gaps)           
-    
-               
-              
+csv_header = ['image_number', 'top_left_corner', 'bottom_right_corner']
+csv_path = "./real_roi_corners.csv"
+this_roi_corner_points = list()
 
 
+def initialize_csv_reader(path):
+    csv_file = open(path, mode='a', newline='')
+    writer = csv.writer(csv_file, delimiter=',', quotechar='"')
+    writer.writerow(csv_header)
+    return writer, csv_file
+
+
+def append_to_csv(record, csv_file, writer):
+    writer.writerow(record)
+    csv_file.flush()
+
+
+def draw_rectangle(event, x, y, flags, param):
+    global this_roi_corner_points
+    this_img = copy.deepcopy(x=img)
+
+    if event == cv2.EVENT_LBUTTONDOWN:
+        this_roi_corner_points = [(x, y)]
+    elif event == cv2.EVENT_LBUTTONUP:
+        this_roi_corner_points.append((x, y))
+        cv2.rectangle(this_img, this_roi_corner_points[0], this_roi_corner_points[1], 255, 3)
+        cv2.imshow('image number %d' % i, this_img)
+
+    # confirm the ROI with right-click
+    if event == cv2.EVENT_RBUTTONDOWN:
+        cv2.destroyWindow('image number %d' % i)
+        print("roi corner points of image %d are:" % i, this_roi_corner_points)
+        this_record = [i, this_roi_corner_points[0], this_roi_corner_points[1]]
+        append_to_csv(record=this_record, csv_file=csv_file, writer=writer)
+
+
+writer, csv_file = initialize_csv_reader(path=csv_path)
+for i in range(1, 51):
+    img = cv2.imread('./images/%d.bmp' % i, 0)
+    cv2.namedWindow('image number %d' % i, cv2.WINDOW_FREERATIO)
+    cv2.imshow('image number %d' % i, img)
+    cv2.setMouseCallback('image number %d' % i, draw_rectangle)
+    cv2.waitKey(0)
