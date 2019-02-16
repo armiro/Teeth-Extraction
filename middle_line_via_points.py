@@ -194,22 +194,25 @@ def remove_outliers_by_distance(image, middle_points, starting_point, show_resul
         plt.show()
 
     if return_result:
-        return middle_points_optimized
+        return middle_points_optimized, image_with_line
 
 
-"""load the image"""
-img_address = './test-auto-cropped/2.bmp'
+def draw_middle_line(image, num_parts):
+    mid_points = find_middle_points(image=image, num_parts=num_parts, return_result=True)
+    sp = find_starting_point(image=image, middle_points=mid_points, return_result=True)
+    _, final_img = remove_outliers_by_distance(image=image, middle_points=mid_points, starting_point=sp,
+                                               return_result=True)
+    return final_img
+
+
+img_address = './test-auto-cropped/5.bmp'
 img = cv2.imread(img_address, 0)
 height, width = img.shape[0], img.shape[1]
 print("image shape is:", img.shape)
 
-
-"""do the preprocessing tasks"""
 img = preprocessing.CLAHE(image=img)
 
-
-mid_points = find_middle_points(image=img, num_parts=500, return_result=True)
-sp = find_starting_point(image=img, middle_points=mid_points, return_result=True)
-
-remove_outliers_by_distance(image=img, middle_points=mid_points, starting_point=sp, show_result=True)
+img = draw_middle_line(image=img, num_parts=50)
+plt.imshow(X=img, cmap='gray')
+plt.show()
 
