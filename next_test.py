@@ -3,9 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import copy
 import cv2
-# from sklearn.cluster import KMeans
 import preprocessing
-# from scipy.ndimage.morphology import binary_fill_holes
 
 
 def find_poi(image, num_parts):
@@ -34,24 +32,6 @@ def find_poi(image, num_parts):
         for line_idx in range(0, len(part)):
             line = part[line_idx, :]
             sum_array.append(sum(line))
-
-        # a = width/(n * (max(sum_array) - min(sum_array)))
-        # b = -1 * a * min(sum_array)
-        # for sum_idx in range(0, len(sum_array)):
-        #     sum_array[sum_idx] = (a * sum_array[sum_idx]) + b
-
-        # binarized = list()
-        # for sum_element in sum_array:
-        #     binarized.append(sum_element > 5)
-        # plt.plot(binarized)
-        # plt.show()
-
-        tmp_array = copy.deepcopy(x=sum_array)
-        # for e in range(0, len(tmp_array)):
-        #     tmp_array[e] = (tmp_array[e] > 4000)
-
-        # plt.plot(tmp_array)
-        # plt.show()
 
         minimum = min(sum_array)
         minimum_idx = sum_array.index(minimum) + h_open
@@ -143,7 +123,7 @@ def draw_mid_line(image, points):
     plt.show()
 
 
-img = cv2.imread('./test-auto-cropped/4.bmp', 0)
+img = cv2.imread('./test-auto-cropped/7.bmp', 0)
 height, width = img.shape[0], img.shape[1]
 # mn, mx = line_intensity(x1=37, y1=73, x2=48, y2=79, image=img)
 # print(mn, mx)
@@ -152,11 +132,12 @@ sp = find_poi(image=img, num_parts=20)
 delta_x = int(width / 20)
 delta_y = 50
 flag = True
+org_img = copy.deepcopy(x=img)
 # img = preprocessing.CLAHE(image=img)
 
 img = preprocessing.imfill(image=img, threshold=10, return_result=1)
 img = np.array(img, dtype='uint8')
-img = cv2.blur(img, (40, 40))
+img = cv2.blur(img, (50, 50))
 
 plt.imshow(img, cmap='gray')
 plt.show()
@@ -185,6 +166,6 @@ while flag:
 
 
 points = np.unique(ar=points, axis=0)
-points.sort(axis=0, kind='quicksort')
-draw_mid_line(image=img, points=points)
+points = sorted(points, key=lambda tup: tup[0])
+draw_mid_line(image=org_img, points=points)
 
