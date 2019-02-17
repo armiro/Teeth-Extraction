@@ -4,7 +4,7 @@ import csv
 
 
 csv_header = ['image_number', 'top_left_corner', 'bottom_right_corner']
-csv_path = "./real_roi_corners.csv"
+csv_path = "./cropped-images/real_roi_corners.csv"
 roi_corner_points = list()
 
 
