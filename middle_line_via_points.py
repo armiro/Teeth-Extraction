@@ -205,14 +205,14 @@ def draw_middle_line(image, num_parts):
     return final_img
 
 
-img_address = './test-auto-cropped/5.bmp'
-img = cv2.imread(img_address, 0)
-height, width = img.shape[0], img.shape[1]
-print("image shape is:", img.shape)
-
-img = preprocessing.CLAHE(image=img)
-
-img = draw_middle_line(image=img, num_parts=50)
-plt.imshow(X=img, cmap='gray')
-plt.show()
+# img_address = './test-auto-cropped/5.bmp'
+# img = cv2.imread(img_address, 0)
+# height, width = img.shape[0], img.shape[1]
+# print("image shape is:", img.shape)
+#
+# img = preprocessing.CLAHE(image=img)
+#
+# img = draw_middle_line(image=img, num_parts=50)
+# plt.imshow(X=img, cmap='gray')
+# plt.show()
 
