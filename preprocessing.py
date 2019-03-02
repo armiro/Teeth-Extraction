@@ -352,3 +352,13 @@ def eliminate_white_pixels(image):
                 image[column_idx, row_idx] -= 1
     return image
 
+
+def eliminate_black_pixels(image):
+    image_height, image_width = image.shape[:2]
+    for row_idx in range(1, image_width):
+        # row = image[row_idx]
+        for column_idx in range(1, image_height):
+            if image[column_idx, row_idx] == 0:
+                image[column_idx, row_idx] += 1
+    return image
+
