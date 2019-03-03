@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from ROI_revision import *
 from ROI_extraction import *
-from tooth_extraction import draw_middle_line
+# from middle_line_via_points import draw_middle_line
 
-for i in range(1, 2):
+for i in range(1, 51):
     img_address = './images/%d.bmp' % i
     img = cv2.imread(img_address, 0)
     print('original image dimensions:', img.shape)
@@ -14,17 +14,15 @@ for i in range(1, 2):
     print('initial ROI dimensions:', initial_roi.shape)
     revised_roi, revised_boundaries = revise_boundaries(image=initial_roi, return_result=1)
     print('final ROI dimensions:', revised_roi.shape)
-    revised_roi = draw_middle_line(image=revised_roi, num_parts=60, show_result=False, return_result=True)
+    # revised_roi = draw_middle_line(image=revised_roi, num_parts=60, show_result=False, return_result=True)
 
     # print(initial_boundaries)
     # print(final_boundaries)
 
     upper_height = initial_boundaries[3] + revised_boundaries[3]
     left_width = initial_boundaries[0] + revised_boundaries[0]
-    # lower_height = img.shape[0] - initial_boundaries[2] + revised_boundaries[2]
     lower_height = upper_height + revised_roi.shape[0]
     right_width = left_width + revised_roi.shape[1]
-    # right_width = initial_boundaries[1]
 
     top_left_corner = (left_width, upper_height)
     top_right_corner = (right_width, upper_height)
@@ -39,12 +37,13 @@ for i in range(1, 2):
     # cv2.circle(img, bottom_left_corner, 20, 1, -1)
     # cv2.circle(img, bottom_right_corner, 20, 1, -1)
 
-    fig = plt.figure()
-    plt.subplot(2, 1, 1), plt.imshow(X=img, cmap='gray')
-    plt.subplot(2, 1, 2), plt.imshow(X=revised_roi, cmap='gray')
+    # fig = plt.figure()
+    # plt.subplot(2, 1, 1),
+    plt.imshow(X=img, cmap='gray')
+    # plt.subplot(2, 1, 2), plt.imshow(X=revised_roi, cmap='gray')
     plt.show()
 
     # file_name = './cropped-figures/%d' % i
     # fig.savefig(file_name)
 
-    # cv2.imwrite('test-auto-cropped/10.bmp', revised_roi)
+    cv2.imwrite('cropped-images/%d.bmp' % i, img)

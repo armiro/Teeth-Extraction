@@ -37,11 +37,11 @@ upper_bound = max(middle_line_pixels)
 upper_jaw = upper_jaw[:upper_bound + 1, :]
 plt.imshow(X=upper_jaw, cmap='gray')
 plt.show()
-cv2.imwrite('./up_jaw.bmp', upper_jaw)
+cv2.imwrite('./test-images/up_jaw.bmp', upper_jaw)
 
 lower_bound = min(middle_line_pixels)
 lower_jaw = lower_jaw[lower_bound + 1:, :]
 plt.imshow(X=lower_jaw, cmap='gray')
 plt.show()
-cv2.imwrite('./low_jaw.bmp', lower_jaw)
+cv2.imwrite('./test-images/low_jaw.bmp', lower_jaw)
 
