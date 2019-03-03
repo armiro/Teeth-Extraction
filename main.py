@@ -1,10 +1,5 @@
-import cv2
-import preprocessing
-import matplotlib.pyplot as plt
-import numpy as np
 from ROI_revision import *
 from ROI_extraction import *
-# from middle_line_via_points import draw_middle_line
 
 for i in range(1, 51):
     img_address = './images/%d.bmp' % i
