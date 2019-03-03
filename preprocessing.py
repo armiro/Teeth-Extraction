@@ -1,7 +1,8 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-from skimage.filters import (threshold_otsu, threshold_niblack, threshold_sauvola)
+from skimage.filters import (threshold_otsu, threshold_niblack, threshold_sauvola, rank)
+from skimage.morphology import disk
 
 
 def draw_histogram(image):
@@ -54,9 +55,13 @@ def match_histogram(source, template):
 
 
 def equalize_histogram(image):
-    equ = cv2.equalizeHist(image)
-    res = np.hstack((image, equ))
-    return equ, res
+    result = cv2.equalizeHist(image)
+    return result
+
+
+def AHE(image, radius=150):
+    result = rank.equalize(image=image, selem=disk(radius))
+    return result
 
 
 def CLAHE(image, clip_limit=2.0, grid_size=8):
@@ -306,8 +311,8 @@ def quadtree_decomp(image, min_size, min_std, show_result=False, return_result=F
         return output_image
 
 
-def imfill(image, threshold, show_result=False, return_result=False):
-    sa = sauvola(image=image, window_size=91, show_result=False, return_result=True)
+def imfill(image, threshold, window_size, show_result=False, return_result=False):
+    sa = sauvola(image=image, window_size=window_size, show_result=False, return_result=True)
     sa_inv = np.invert(sa)
     sa_inv = np.array(sa_inv, dtype='uint8')
 
