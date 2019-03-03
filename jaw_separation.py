@@ -9,7 +9,6 @@ img = cv2.imread('./test-images/snaked.bmp', 0)
 height, width = img.shape[:2]
 print('image shape:', img.shape)
 
-img = prep.CLAHE(image=img)
 upper_jaw = np.zeros(shape=(height, 1))
 lower_jaw = np.zeros(shape=(height, 1))
 line_points = list()
