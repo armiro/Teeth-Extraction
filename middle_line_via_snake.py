@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 import cv2
 import preprocessing
 from middle_line_via_points import find_middle_points, find_starting_point
+import time
+from skimage.filters import rank
+from skimage.morphology import disk
 
 
 def calculate_line_intensity_features(this_point, that_point, image):
@@ -50,7 +53,7 @@ def find_points(image, num_parts, v_bound, v_stride):
     delta_y = v_bound
     flag = True
 
-    prep_image = preprocessing.imfill(image=image, threshold=10, return_result=1)
+    prep_image = preprocessing.imfill(image=image, window_size=125, threshold=10, return_result=1)
     prep_image = np.array(prep_image, dtype='uint8')
     prep_image = cv2.blur(prep_image, (50, 50))
 
@@ -88,13 +91,16 @@ def find_points(image, num_parts, v_bound, v_stride):
 def draw_middle_line(image, num_parts, v_bound, v_stride):
     points = find_points(image=image, num_parts=num_parts, v_bound=v_bound, v_stride=v_stride)
     for point_idx in range(len(points) - 1):
-        cv2.line(image, (points[point_idx][0], points[point_idx][1]), (points[point_idx + 1][0], points[point_idx + 1][1]), 255, 3)
-        cv2.circle(image, (points[point_idx][0], points[point_idx][1]), 10, 255, -1)
+        cv2.line(image, (points[point_idx][0], points[point_idx][1]), (points[point_idx + 1][0], points[point_idx + 1][1]), 255, 1)
+        # cv2.circle(image, (points[point_idx][0], points[point_idx][1]), 10, 255, -1)
     return image
 
 
-img = cv2.imread('./test-auto-cropped/5.bmp', 0)
-final_img = draw_middle_line(image=img, num_parts=20, v_bound=50, v_stride=2)
-
-plt.imshow(X=final_img, cmap='gray')
-plt.show()
+# img = cv2.imread('./test-auto-cropped/7.bmp', 0)
+# t0 = time.time()
+# final_img = draw_middle_line(image=img, num_parts=20, v_bound=50, v_stride=2)
+# t1 = time.time()
+# plt.imshow(X=final_img, cmap='gray')
+# plt.show()
+# print('snake algorithm elapsed time: %.2f secs' % (t1-t0))
+# cv2.imwrite('./test-images/snaked.bmp', final_img)
