@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
+import copy
 
 
 def rotate_and_scale(image, scale=1.0, angle=0):
@@ -19,39 +20,22 @@ def rotate_and_scale(image, scale=1.0, angle=0):
 
 
 img = cv2.imread('./test-auto-cropped/2.bmp', 0)
+rotated_img = copy.deepcopy(x=img)
 print('image shape:', img.shape)
-template = cv2.imread('./test-images/t2.jpg', 0)
+template = cv2.imread('./test-images/t1.bmp', 0)
 print('template shape:', template.shape)
 template_h, template_w = template.shape[:2]
 img_h, img_w = img.shape[:2]
+mid_h, mid_w = int(img_h/2.), int(img_w/2.)
 
 """best value template matching"""
 # res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED)
 # min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 # top_left = max_loc
 # bottom_right = (top_left[0] + template_w, top_left[1] + template_h)
-# cv2.rectangle(img, top_left, bottom_right, 0, 3)
+# cv2.rectangle(img, top_left, bottom_right, 0, 2)
 """end of best value template matching"""
 
-"""scale independent"""
-# found = None
-# for scale in np.linspace(0.1, 1, 10)[::-1]:
-#
-#     resized_template = cv2.resize(template, (int(template_h * scale), int(template_w * scale)))
-#     ratio = template_w / float(resized_template.shape[1])
-#     if resized_template.shape[0] > img_h or resized_template.shape[1] > img_w:
-#         continue
-#     print(resized_template.shape)
-#     res = cv2.matchTemplate(img, resized_template, cv2.TM_CCOEFF_NORMED)
-#     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-#     if found is None or max_val > found[0]:
-#         found = (max_val, max_loc, ratio)
-#     print('found is:', found)
-#     (_, max_loc, ratio) = found
-#     start_point = (int(max_loc[0] * ratio), int(max_loc[1] * ratio))
-#     end_point = (int((max_loc[0] + template_w) * ratio), int((max_loc[1] + template_h) * ratio))
-#     cv2.rectangle(img, start_point, end_point, (0, 0, 255), 2)
-"""end of scale independent"""
 
 """multiple values"""
 # threshold = 0.55
@@ -60,33 +44,52 @@ img_h, img_w = img.shape[:2]
 #     cv2.rectangle(img_gray, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
 """end of multiple values"""
 
+
+"""scale independent"""
+# found = None
+# for scale in np.linspace(1, 2, 4)[::-1]:
+#     resized_template = cv2.resize(template, (int(template_w * scale), int(template_h * scale)))
+#     # ratio = float(resized_template.shape[1]) / template_w
+#     if resized_template.shape[0] > img_h or resized_template.shape[1] > img_w:
+#         continue
+#     res = cv2.matchTemplate(img, resized_template, cv2.TM_CCOEFF_NORMED)
+#     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+#     if found is None or max_val > found[0]:
+#         found = (max_val, max_loc)
+#     print('found is:', found)
+#     (_, max_loc) = found
+#     start_point = (int(max_loc[0] * scale), int(max_loc[1] * scale))
+#     end_point = (int((max_loc[0] + template_w) * scale), int((max_loc[1] + template_h) * scale))
+#     cv2.rectangle(img, start_point, end_point, 0, 2)
+"""end of scale independent"""
+
+
 """rotation and scale invariant"""
 found = None
-for degree in np.linspace(start=20, stop=21, num=2):
+for degree in np.linspace(start=0, stop=360, num=45):
 
     # rotated_template, M = rotate_and_scale(image=template, scale=1.0, angle=degree)
-    rotated_img, M = rotate_and_scale(image=img, scale=1.0, angle=degree)
-    print(rotated_img)
-    print(type(rotated_img))
-    print(len(rotated_img))
+    rotated_img, M = rotate_and_scale(image=rotated_img, scale=1.0, angle=degree)
     # if rotated_template.shape[0] > img_h or rotated_template.shape[1] > img_w:
     #     continue
 
-    print(degree)
     """single"""
     res = cv2.matchTemplate(rotated_img, template, cv2.TM_CCOEFF_NORMED)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-    if found is None or max_val > found[0]:
-        found = (max_val, max_loc)
-        print('found is:', found)
-        print('degree is:', degree)
-    (_, max_loc) = found
-    sp = (int(max_loc[0]), int(max_loc[1]))
-    ep = (int(max_loc[0] + template_w), int(max_loc[1] + template_h))
-    cv2.rectangle(img, sp, ep, 0, 2)
+    found = (max_val, max_loc)
+    print('found is:', found)
+    print('degree is:', degree)
+    if max_val >= 0.8:
+        sp = (int(max_loc[0]), int(max_loc[1]))
+        ep = (int(max_loc[0] + template_w), int(max_loc[1] + template_h))
+        cv2.rectangle(rotated_img, sp, ep, 0, 2)
+    big_img, mm = rotate_and_scale(image=rotated_img, scale=1.0, angle=(-1 * degree))
+    big_img_h, big_img_w = big_img.shape[:2]
+    rotated_img = big_img[int((big_img_h / 2.) - mid_h)+1:int((big_img_h / 2.) + mid_h),
+                          int((big_img_w / 2.) - mid_w)+1:int((big_img_w / 2.) + mid_w)]
     plt.imshow(X=rotated_img, cmap='gray')
     plt.show()
-
+#
 #     """multiple"""
 #     res = cv2.matchTemplate(img, rotated_template, cv2.TM_CCOEFF_NORMED)
 #     threshold = 0.7
@@ -110,13 +113,8 @@ for degree in np.linspace(start=20, stop=21, num=2):
 #     top_right = np.matmul(rotation_matrix, top_right)
 #     bottom_right = np.matmul(rotation_matrix, bottom_right)
 
-
-
-
 """end of rotation and scale invariant"""
 
-
-# mat = cv2.getRotationMatrix2D(center=(template_w / 2, template_h / 2), angle=10, scale=1.0)
-# print(mat)
-plt.imshow(img, cmap='gray')
+plt.imshow(rotated_img, cmap='gray')
 plt.show()
+# cv2.imwrite('./results/ritm_final.bmp', rotated_img)
