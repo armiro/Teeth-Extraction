@@ -20,6 +20,7 @@ def rotate_and_scale(image, scale=1.0, angle=0):
 
 
 img = cv2.imread('./test-auto-cropped/2.bmp', 0)
+# img = cv2.resize(src=img, dsize=(1682, 606))
 rotated_img = copy.deepcopy(x=img)
 print('image shape:', img.shape)
 template = cv2.imread('./test-images/t1.bmp', 0)
@@ -66,7 +67,7 @@ mid_h, mid_w = int(img_h/2.), int(img_w/2.)
 
 """rotation and scale invariant"""
 found = None
-for degree in np.linspace(start=0, stop=360, num=45):
+for degree in np.linspace(start=0, stop=360, num=46):
 
     # rotated_template, M = rotate_and_scale(image=template, scale=1.0, angle=degree)
     rotated_img, M = rotate_and_scale(image=rotated_img, scale=1.0, angle=degree)
@@ -80,15 +81,19 @@ for degree in np.linspace(start=0, stop=360, num=45):
     print('found is:', found)
     print('degree is:', degree)
     if max_val >= 0.8:
+        org_img = copy.deepcopy(x=img)
+        rotated_org_img, _ = rotate_and_scale(image=org_img, scale=1.0, angle=degree)
         sp = (int(max_loc[0]), int(max_loc[1]))
         ep = (int(max_loc[0] + template_w), int(max_loc[1] + template_h))
         cv2.rectangle(rotated_img, sp, ep, 0, 2)
-    big_img, mm = rotate_and_scale(image=rotated_img, scale=1.0, angle=(-1 * degree))
+        plt.imshow(X=rotated_org_img[sp[1]:ep[1], sp[0]:ep[0]], cmap='gray')
+        plt.show()
+    big_img, _ = rotate_and_scale(image=rotated_img, scale=1.0, angle=(360 - degree))
     big_img_h, big_img_w = big_img.shape[:2]
     rotated_img = big_img[int((big_img_h / 2.) - mid_h)+1:int((big_img_h / 2.) + mid_h),
                           int((big_img_w / 2.) - mid_w)+1:int((big_img_w / 2.) + mid_w)]
-    plt.imshow(X=rotated_img, cmap='gray')
-    plt.show()
+    # plt.imshow(X=rotated_img, cmap='gray')
+    # plt.show()
 #
 #     """multiple"""
 #     res = cv2.matchTemplate(img, rotated_template, cv2.TM_CCOEFF_NORMED)
