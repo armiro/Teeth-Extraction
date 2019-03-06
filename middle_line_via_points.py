@@ -180,7 +180,7 @@ def remove_outliers_by_distance(image, middle_points, starting_point, show_resul
     # connect the points together to draw the middle line of the jaw
     image_with_line = copy.deepcopy(x=image)
     for idx in range(0, len(middle_points_optimized)-1):
-        cv2.line(image_with_line, middle_points_optimized[idx], middle_points_optimized[idx + 1], 255, 5)
+        cv2.line(image_with_line, middle_points_optimized[idx], middle_points_optimized[idx + 1], 255, 1)
 
     # draw the raw middle points on another image in order to show as the result
     image_with_points = copy.deepcopy(x=image)
@@ -205,14 +205,12 @@ def draw_middle_line(image, num_parts):
     return final_img
 
 
-# img_address = './test-auto-cropped/5.bmp'
+# img_address = './test-auto-cropped/2.bmp'
 # img = cv2.imread(img_address, 0)
-# height, width = img.shape[0], img.shape[1]
+# img = preprocessing.sauvola(image=img, window_size=175, return_result=1)
+# img = np.array(img, dtype='uint8')
 # print("image shape is:", img.shape)
-#
-# img = preprocessing.CLAHE(image=img)
 #
 # img = draw_middle_line(image=img, num_parts=50)
 # plt.imshow(X=img, cmap='gray')
 # plt.show()
-
