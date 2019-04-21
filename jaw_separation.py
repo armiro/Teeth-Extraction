@@ -5,13 +5,15 @@ import numpy as np
 import time
 
 
-img = cv2.imread('./test-images/snaked.bmp', 0)
+img = cv2.imread('./test-images/snaked_7_sauvola.bmp', 0)
 height, width = img.shape[:2]
 print('image shape:', img.shape)
 
 upper_jaw = np.zeros(shape=(height, 1))
 lower_jaw = np.zeros(shape=(height, 1))
 line_points = list()
+
+# change pixels with the value of 0 to 1; for further purpose of applying genetic algorithm
 img = prep.eliminate_black_pixels(image=img)
 middle_line_pixels = list()
 
@@ -36,11 +38,11 @@ upper_bound = max(middle_line_pixels)
 upper_jaw = upper_jaw[:upper_bound + 1, :]
 plt.imshow(X=upper_jaw, cmap='gray')
 plt.show()
-cv2.imwrite('./test-images/up_jaw.bmp', upper_jaw)
+cv2.imwrite('./test-images/7_upper_sauvola.bmp', upper_jaw)
 
 lower_bound = min(middle_line_pixels)
 lower_jaw = lower_jaw[lower_bound + 1:, :]
 plt.imshow(X=lower_jaw, cmap='gray')
 plt.show()
-cv2.imwrite('./test-images/low_jaw.bmp', lower_jaw)
+cv2.imwrite('./test-images/7_lower_sauvola.bmp', lower_jaw)
 
