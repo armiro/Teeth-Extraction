@@ -95,7 +95,7 @@ def global_threshold(image, threshold, show_result=False, return_result=False):
 
 def adaptive_threshold(image, blur=False, show_result=False, return_result=False):
     if blur:
-        image = cv2.bilateralFilter(image, 17, 35, 35)
+        image = cv2.bilateralFilter(src=image, d=17, sigmaColor=35, sigmaSpace=35)
     ret, th = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
     th_mean = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 35, 5)
     th_gaussian = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 35, 5)
@@ -118,7 +118,7 @@ def adaptive_threshold(image, blur=False, show_result=False, return_result=False
 
 def otsu(image, blur=False, show_result=False, return_result=False):
     if blur:
-        image = cv2.GaussianBlur(image, (5, 5), 0)
+        image = cv2.GaussianBlur(src=image, ksize=(5, 5), sigmaX=0)
 
     ret, th = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
     ret_otsu, th_otsu = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -172,7 +172,7 @@ def sauvola(image, window_size, show_result=False, return_result=False):
 
 def canny(image, blur=False, show_result=False, return_result=False):
     if blur:
-        image = cv2.GaussianBlur(image, (5, 5), 0)
+        image = cv2.GaussianBlur(src=image, ksize=(5, 5), sigmaX=0)
     edges = cv2.Canny(image, 140, 200)
 
     if show_result:
