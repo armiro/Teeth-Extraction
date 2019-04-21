@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 import copy
+import time
 
 
 def rotate_and_scale(image, scale=1.0, angle=0):
@@ -23,7 +24,7 @@ img = cv2.imread('./test-auto-cropped/2.bmp', 0)
 # img = cv2.resize(src=img, dsize=(1682, 606))
 rotated_img = copy.deepcopy(x=img)
 print('image shape:', img.shape)
-template = cv2.imread('./test-images/t1.bmp', 0)
+template = cv2.imread('./test-images/t7_cropped.jpg', 0)
 print('template shape:', template.shape)
 template_h, template_w = template.shape[:2]
 img_h, img_w = img.shape[:2]
@@ -66,6 +67,7 @@ mid_h, mid_w = int(img_h/2.), int(img_w/2.)
 
 
 """rotation and scale invariant"""
+t0 = time.time()
 found = None
 for degree in np.linspace(start=0, stop=360, num=46):
 
@@ -80,7 +82,7 @@ for degree in np.linspace(start=0, stop=360, num=46):
     found = (max_val, max_loc)
     print('found is:', found)
     print('degree is:', degree)
-    if max_val >= 0.8:
+    if max_val >= 0.7:
         org_img = copy.deepcopy(x=img)
         rotated_org_img, _ = rotate_and_scale(image=org_img, scale=1.0, angle=degree)
         sp = (int(max_loc[0]), int(max_loc[1]))
@@ -119,7 +121,8 @@ for degree in np.linspace(start=0, stop=360, num=46):
 #     bottom_right = np.matmul(rotation_matrix, bottom_right)
 
 """end of rotation and scale invariant"""
-
+t1 = time.time()
+print('elapsed time: %.2f' % (t1-t0))
 plt.imshow(rotated_img, cmap='gray')
 plt.show()
 # cv2.imwrite('./results/ritm_final.bmp', rotated_img)
