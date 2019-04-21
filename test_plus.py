@@ -36,7 +36,7 @@ for row_idx in range(0, w):
 t1 = time.time()
 print('elapsed time: %.2f secs' % (t1-t0))
 
-cv2.imwrite('./test-images/7_sauvola.bmp', img)
+# cv2.imwrite('./test-images/7_sauvola.bmp', img)
 plt.subplot(2, 1, 1), plt.imshow(X=org, cmap='gray'), plt.axis('off')
 plt.subplot(2, 1, 2), plt.imshow(X=img, cmap='gray'), plt.axis('off')
 plt.show()
