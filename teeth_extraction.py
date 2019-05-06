@@ -28,7 +28,7 @@ bottom_coordinates = [0] + coordinates[2] + [width]
 white = (255, 255, 255)
 num_lines = len(coordinates[0])
 
-for idx in range(0, 3):
+for idx in range(0, num_lines):
     tooth_corners = np.array([[(top_coordinates[idx], 0), (top_coordinates[idx+1], 0),
                                (middle_coordinates[idx+1], int(height/2)), (bottom_coordinates[idx+1], height),
                                (bottom_coordinates[idx], height), (middle_coordinates[idx], int(height/2))]],
@@ -43,9 +43,11 @@ for idx in range(0, 3):
     right_bound = max([top_coordinates[idx + 1], middle_coordinates[idx + 1], bottom_coordinates[idx + 1]])
     tooth_img = tooth_img[:, left_bound:right_bound]
 
+    # create path for each jaw (skip, if the path exists)
     os.makedirs('./extracted-images/%d' % int(img_num), exist_ok=True)
-
-    cv2.imwrite('./extracted-images/%d/%s%d.bmp' % (int(img_num), jaw_type[0], idx+1), tooth_img)
+    
+    # save each tooth with a name in the newly created path
+    cv2.imwrite('./extracted-images/%d/%s%d.bmp' % (int(img_num), jaw_type[0].upper(), idx+1), tooth_img)
     plt.imshow(X=tooth_img, cmap='gray')
     plt.show()
 
