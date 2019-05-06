@@ -3,9 +3,13 @@ import cv2
 import numpy as np
 import copy
 import matplotlib.pyplot as plt
+import os
 
 img_path = './test-images/7_lower.bmp'
 csv_path = './test-images/Tooth.csv'
+
+img_name = img_path[img_path.rfind('/')+1:img_path.rfind('.bmp')]
+img_num, jaw_type = img_name.split("_")
 
 img = cv2.imread(img_path, 0)
 height, width = img.shape[:2]
@@ -24,7 +28,7 @@ bottom_coordinates = [0] + coordinates[2] + [width]
 white = (255, 255, 255)
 num_lines = len(coordinates[0])
 
-for idx in range(0, num_lines):
+for idx in range(0, 3):
     tooth_corners = np.array([[(top_coordinates[idx], 0), (top_coordinates[idx+1], 0),
                                (middle_coordinates[idx+1], int(height/2)), (bottom_coordinates[idx+1], height),
                                (bottom_coordinates[idx], height), (middle_coordinates[idx], int(height/2))]],
@@ -39,7 +43,9 @@ for idx in range(0, num_lines):
     right_bound = max([top_coordinates[idx + 1], middle_coordinates[idx + 1], bottom_coordinates[idx + 1]])
     tooth_img = tooth_img[:, left_bound:right_bound]
 
-    # cv2.imwrite('./extracted-images/masked.bmp', tooth_img)
+    os.makedirs('./extracted-images/%d' % int(img_num), exist_ok=True)
+
+    cv2.imwrite('./extracted-images/%d/%s%d.bmp' % (int(img_num), jaw_type[0], idx+1), tooth_img)
     plt.imshow(X=tooth_img, cmap='gray')
     plt.show()
 
