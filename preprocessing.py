@@ -166,6 +166,9 @@ def sauvola(image, window_size, show_result=False, return_result=False):
         plt.subplot(3, 1, 3), plt.imshow(binary_sauvola, cmap='gray'), plt.title('Sauvola Threshold'), plt.axis('off')
         plt.show()
 
+    binary_sauvola = np.array(binary_sauvola, dtype='uint8')
+    binary_sauvola = np.where(binary_sauvola == 1, np.uint8(255), np.uint8(0))
+
     if return_result:
         return binary_sauvola
 
@@ -349,21 +352,11 @@ def imfill(image, threshold, window_size, show_result=False, return_result=False
 
 
 def eliminate_white_pixels(image):
-    image_height, image_width = image.shape[:2]
-    for row_idx in range(1, image_width):
-        # row = image[row_idx]
-        for column_idx in range(1, image_height):
-            if image[column_idx, row_idx] == 255:
-                image[column_idx, row_idx] -= 1
+    image = np.where(image == 255, np.uint8(254), image)
     return image
 
 
 def eliminate_black_pixels(image):
-    image_height, image_width = image.shape[:2]
-    for row_idx in range(1, image_width):
-        # row = image[row_idx]
-        for column_idx in range(1, image_height):
-            if image[column_idx, row_idx] == 0:
-                image[column_idx, row_idx] += 1
+    image = np.where(image == 0, np.uint8(1), image)
     return image
 
