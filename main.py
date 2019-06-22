@@ -4,8 +4,9 @@ from middle_line_via_snake import *
 from jaw_separation import separate_jaws
 import time
 
-for i in range(8, 9):
-    img_address = './test-images/%d.bmp' % i
+for i in range(1, 51):
+    print("loading image number %d" % i)
+    img_address = './images/%d.bmp' % i
     img = cv2.imread(img_address, 0)
     img_copy = copy.deepcopy(x=img)
 
@@ -34,11 +35,12 @@ for i in range(8, 9):
     plt.imshow(X=img_copy, cmap='gray')
     plt.show()
 
-    print("continue? (y/n)")
+    print("save & continue? (y/n)")
     if input() != 'y':
         print("process terminated!")
         exit()
 
+    cv2.imwrite('./auto-cropped-images/%d.bmp' % i, revised_roi)
     cropped_img = revised_roi
 
     """do any preprocessing needed"""
@@ -75,10 +77,9 @@ for i in range(8, 9):
 
     print("save results? (y/n)")
     if input() == 'y':
-        cv2.imwrite('./test-auto-cropped/%d.bmp' % i, revised_roi)
         cv2.imwrite('./test-images/%d_upper_clahe_sauvola.bmp' % i, upper_jaw)
         cv2.imwrite('./test-images/%d_lower_clahe_sauvola.bmp' % i, lower_jaw)
-        print("saved results!")
+        print("results saved!")
 
     print('process finished!')
 
