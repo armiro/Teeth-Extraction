@@ -1,5 +1,4 @@
 import numpy as np
-# import matplotlib.pyplot as plt
 import cv2
 import preprocessing
 from middle_line_via_points import find_middle_points, find_starting_point
@@ -44,7 +43,7 @@ def find_points(image, num_parts, v_bound, v_stride):
     # find the starting point
     sp = find_starting_point(image=image,
                              middle_points=find_middle_points(image=image, num_parts=num_parts, return_result=True),
-                             return_result=True)
+                             return_result=True, show_result=True)
     image_width = image.shape[1]
     delta_x = int(image_width / num_parts)
     delta_y = v_bound
@@ -91,12 +90,3 @@ def draw_middle_line(image, points):
                  (points[point_idx + 1][0], points[point_idx + 1][1]), 255, 1)
     return image
 
-
-# img = cv2.imread('./test-auto-cropped/7.bmp', 0)
-# t0 = time.time()
-# final_img = draw_middle_line(image=img, num_parts=20, v_bound=50, v_stride=2)
-# t1 = time.time()
-# plt.imshow(X=final_img, cmap='gray')
-# plt.show()
-# print('snake algorithm elapsed time: %.2f secs' % (t1-t0))
-# cv2.imwrite('./test-images/snaked.bmp', final_img)
