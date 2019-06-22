@@ -3,7 +3,6 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
-import preprocessing
 
 
 def find_middle_points(image, num_parts, show_result=False, return_result=False):
@@ -78,13 +77,16 @@ def fit_graph(image, middle_points):
 def find_starting_point(image, middle_points, show_result=False, return_result=False):
     height, width = image.shape[0], image.shape[1]
     x_supposed_sp = int(width / 2.)
+    y_supposed_sp = int(height / 2.)
     x_bound = int(width / 5.)
+    y_bound = int(height / 6.)
     mid_y = list()
 
     # find points which are horizontally located in the middle of image
     for point in middle_points:
         if (point[0] > (x_supposed_sp - x_bound)) & (point[0] < (x_supposed_sp + x_bound)):
-            mid_y.append(point[1])
+            if (point[1] > (y_supposed_sp - y_bound)) & (point[1] < (y_supposed_sp + y_bound)):
+                mid_y.append(point[1])
 
     # define the estimated starting point (supposed_sp)
     y_supposed_sp = int(np.mean(a=mid_y))
@@ -204,13 +206,3 @@ def draw_middle_line(image, num_parts):
                                                return_result=True)
     return final_img
 
-
-# img_address = './test-auto-cropped/2.bmp'
-# img = cv2.imread(img_address, 0)
-# img = preprocessing.sauvola(image=img, window_size=175, return_result=1)
-# img = np.array(img, dtype='uint8')
-# print("image shape is:", img.shape)
-#
-# img = draw_middle_line(image=img, num_parts=50)
-# plt.imshow(X=img, cmap='gray')
-# plt.show()
