@@ -43,7 +43,7 @@ def find_points(image, num_parts, v_bound, v_stride):
     # find the starting point
     sp = find_starting_point(image=image,
                              middle_points=find_middle_points(image=image, num_parts=num_parts, return_result=True),
-                             return_result=True, show_result=True)
+                             return_result=True)
     image_width = image.shape[1]
     delta_x = int(image_width / num_parts)
     delta_y = v_bound
