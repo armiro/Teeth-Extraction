@@ -88,6 +88,10 @@ def find_starting_point(image, middle_points, show_result=False, return_result=F
             if (point[1] > (y_supposed_sp - y_bound)) & (point[1] < (y_supposed_sp + y_bound)):
                 mid_y.append(point[1])
 
+    # not letting mid_y to be empty if there were no acceptable points to add
+    if not mid_y:
+        mid_y.append(y_supposed_sp)
+
     # define the estimated starting point (supposed_sp)
     y_supposed_sp = int(np.mean(a=mid_y))
     supposed_sp = (x_supposed_sp, y_supposed_sp)
