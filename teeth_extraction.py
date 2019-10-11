@@ -4,22 +4,50 @@ import numpy as np
 import copy
 import matplotlib.pyplot as plt
 import os
+import glob
 
-img_path = './test-images/7_lower.bmp'
-csv_path = './test-images/Tooth.csv'
 
-img_name = img_path[img_path.rfind('/')+1:img_path.rfind('.bmp')]
-img_num, jaw_type = img_name.split("_")
+lower_text_path = './lower_jaws/low.txt'
+lower_text_file = open(file=lower_text_path, mode='r')
+lines = lower_text_file.readlines()
 
-img = cv2.imread(img_path, 0)
-height, width = img.shape[:2]
-csv_file = open(file=csv_path, mode='r', newline='')
-coordinates = list(csv.reader(csv_file, delimiter=',', quotechar='"'))
-upsize_coef = round((width / 216), ndigits=2)
+pts = list()
+for line in lines:
+    if line.find('.bmp') is not -1:
+        num = line.split(sep='_')[0]
+    elif line is not '/n':
+        line = line[:-2]
+        points = line.split(sep=';')
+        top_dev = points[:30]
+        org = points[30:60]
+        bottom_dev = points[60:]
+    else:
+        pts.append((num, top_dev, org, bottom_dev))
+
+images = os.scandir(path='./lower_jaws')
+
+for image_name in glob.glob(pathname="**.bmp"):
+    img_num = image_name.split("_")[0]
+    img = cv2.imread(image_name, 0)
+    height, width = img.shape[:2]
+    upsize_coef = round((width / 216), ndigits=2)
+
+    for pt in pts:
+        if pt[0] is img_num:
+
+
+    coordinates = [int(int(x) * upsize_coef) for point in points]
+
+
+# img_name = img_path[img_path.rfind('/')+1:img_path.rfind('.bmp')]
+# img_num, jaw_type = img_name.split("_")
+# csv_file = open(file=csv_path, mode='r', newline='')
+# coordinates = list(csv.reader(csv_file, delimiter=',', quotechar='"'))
+
 
 # every element in every "row" of the "coordinates", is saved as string. we need to map it into integer,
 # and also multiply it by the "upsize_coef" at the same time
-coordinates = [list(map(lambda x: int(int(x) * upsize_coef), row)) for row in coordinates]
+# coordinates = [list(map(lambda x: int(int(x) * upsize_coef), row)) for row in coordinates]
 
 top_coordinates = [0] + coordinates[0] + [width]
 middle_coordinates = [0] + coordinates[1] + [width]
