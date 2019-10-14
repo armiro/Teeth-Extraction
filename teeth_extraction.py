@@ -20,27 +20,53 @@ for line in lines:
     else:
         pts.append((num, points))
 
-images = os.scandir(path='./lower_jaws/')
-os.chdir('./lower_jaws/')
+# images = os.scandir(path='./lower_jaws/')
 
-for image_name in glob.glob(pathname="**.bmp"):
-    img_num = image_name.split("_")[0]
+for image_name in glob.glob(pathname="./lower_jaws/**.bmp"):
+    print(image_name)
+    img_num = image_name.split('\\')[-1].split('_')[0]
+    print("image number is:", img_num)
     img = cv2.imread(image_name, 0)
     height, width = img.shape[:2]
     upsize_coef = round((width / 216), ndigits=2)
-    print('image_number is', img_num)
+
     for pt in pts:
         if pt[0] == img_num:
-
-            # print(pt[1][:30])
-            # print(pt[1][30:60])
-            # print(pt[1][60:])
-
+            print("point found:", pt[0])
             coordinates = [int(int(point) * upsize_coef) for point in pt[1]]
             org = coordinates[30:60]
-            top_dev = [0] + [i + org[coordinates[:30].index(i)] for i in coordinates[:30]] + [width]
-            bottom_dev = [0] + [i + org[coordinates[60:].index(i)] for i in coordinates[60:]] + [width]
+            top_dev = coordinates[:30]
+            bottom_dev = coordinates[60:]
+
+            org = np.array(org)
+            top_dev = np.array(top_dev)
+            bottom_dev = np.array(bottom_dev)
+
+            top_dev = list(org + top_dev)
+            bottom_dev = list(org + bottom_dev)
+            org = list(org)
+
+            org_tmp = org[:]
+            top_dev_tmp = top_dev[:]
+            bottom_dev_tmp = bottom_dev[:]
+            for i in range(len(org)):
+                try:
+                    if org[i] == 0:
+                        org_tmp.remove(org[i])
+                        bottom_dev_tmp.remove(bottom_dev[i])
+                        top_dev_tmp.remove(top_dev[i])
+                except:
+                    pass
+            org = org_tmp[:]
+            top_dev = top_dev_tmp[:]
+            bottom_dev = bottom_dev_tmp[:]
+
+            bottom_dev = [0 if i < 0 else i for i in bottom_dev]
+            top_dev = [0 if i < 0 else i for i in top_dev]
+
             org = [0] + org + [width]
+            bottom_dev = [0] + bottom_dev + [width]
+            top_dev = [0] + top_dev + [width]
 
             print(top_dev)
             print(org)
@@ -48,7 +74,7 @@ for image_name in glob.glob(pathname="**.bmp"):
 
             white = (255, 255, 255)
 
-            for idx in range(0, 30):
+            for idx in range(0, len(org)-1):
                 tooth_corners = np.array([[(top_dev[idx], 0), (top_dev[idx + 1], 0),
                                            (org[idx + 1], int(height / 2)), (bottom_dev[idx + 1], height),
                                            (bottom_dev[idx], height), (org[idx], int(height / 2))]],
@@ -64,10 +90,11 @@ for image_name in glob.glob(pathname="**.bmp"):
                 tooth_img = tooth_img[:, left_bound:right_bound]
 
                 # create path for each jaw (skip, if the path exists)
-                # os.makedirs('./extracted-images/%d' % int(img_num), exist_ok=True)
+                os.makedirs('./extracted-images/%d' % int(img_num), exist_ok=True)
 
                 # save each tooth with a name in the newly created path
-                # cv2.imwrite('./extracted-images/%d/L%d.bmp' % (int(img_num), idx + 1), tooth_img)
+                cv2.imwrite('./extracted-images/%d/L%d.bmp' % (int(img_num), idx + 1), tooth_img)
+
                 plt.imshow(X=tooth_img, cmap='gray')
                 plt.show()
             break
