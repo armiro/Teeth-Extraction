@@ -41,7 +41,7 @@ for image_name in glob.glob(pathname="./lower_jaws/**.bmp"):
     height, width = img.shape[:2]
     mid = int(height / 2.)
     upsize_coef = round((width / 216), ndigits=2)
-    # print(rev_indices)
+    print('up-size coefficient=', upsize_coef)
     rev = [e[1] for e in rev_pts if e[0] == img_num][0]
     rev = [int(e) for e in rev]
 
@@ -66,24 +66,9 @@ for image_name in glob.glob(pathname="./lower_jaws/**.bmp"):
 
             # 'rev' file is brought using MATLAB, hence the indices start from 1,
             # whereas in python indices start from 0
-            org = [org[i-1] for i in rev]
-            top_dev = [top_dev[i-1] for i in rev]
-            bottom_dev = [bottom_dev[i-1] for i in rev]
-
-            # org_tmp = org[:]
-            # top_dev_tmp = top_dev[:]
-            # bottom_dev_tmp = bottom_dev[:]
-            # for i in range(len(org)):
-            #     try:
-            #         if org[i] == 0:
-            #             org_tmp.remove(org[i])
-            #             bottom_dev_tmp.remove(bottom_dev[i])
-            #             top_dev_tmp.remove(top_dev[i])
-            #     except:
-            #         pass
-            # org = org_tmp[:]
-            # top_dev = top_dev_tmp[:]
-            # bottom_dev = bottom_dev_tmp[:]
+            org = [org[i - 1] for i in rev]
+            top_dev = [top_dev[i - 1] for i in rev]
+            bottom_dev = [bottom_dev[i - 1] for i in rev]
 
             org = [0] + org + [width]
             bottom_dev = [0] + bottom_dev + [width]
@@ -110,10 +95,10 @@ for image_name in glob.glob(pathname="./lower_jaws/**.bmp"):
                 tooth_img = tooth_img[:, left_bound:right_bound]
 
                 # create path for each jaw (skip, if the path exists)
-                os.makedirs('./extracted-images/%d' % int(img_num), exist_ok=True)
+                # os.makedirs('./extracted-images/%d' % int(img_num), exist_ok=True)
 
                 # save each tooth with a name in the newly created path
-                cv2.imwrite('./extracted-images/%d/L%d.bmp' % (int(img_num), idx + 1), tooth_img)
+                # cv2.imwrite('./extracted-images/%d/L%d.bmp' % (int(img_num), idx + 1), tooth_img)
 
                 # plt.imshow(X=tooth_img, cmap='gray')
                 # plt.show()
@@ -123,9 +108,9 @@ for image_name in glob.glob(pathname="./lower_jaws/**.bmp"):
                 cv2.line(img, (top_dev[idx], 0), (element, mid), 255, 2)
                 cv2.line(img, (element, mid), (bottom_dev[idx], height), 255, 2)
 
-            # plt.imshow(X=img, cmap='gray')
-            # plt.show()
+            plt.imshow(X=img, cmap='gray')
+            plt.show()
 
-            cv2.imwrite('./extracted-images/%d/L.bmp' % (int(img_num)), img)
+            # cv2.imwrite('./extracted-images/%d/L.bmp' % (int(img_num)), img)
 
             break
