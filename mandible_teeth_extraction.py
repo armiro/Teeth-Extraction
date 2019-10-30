@@ -109,6 +109,9 @@ for image_name in glob.glob(pathname="./lower_jaws/**.bmp"):
                 cv2.line(img, (element, mid), (bottom_dev[idx], height), 255, 2)
 
             plt.imshow(X=img, cmap='gray')
+            plt.title('image number: %d' % int(img_num))
+            plt.xticks([])
+            plt.yticks([])
             plt.show()
 
             # cv2.imwrite('./extracted-images/%d/L.bmp' % (int(img_num)), img)
